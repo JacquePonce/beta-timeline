@@ -169,41 +169,17 @@ const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","D
 const CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
 
 // ---------------------------------------------------------------------------
-// CSV parsing (handles quoted fields with commas / newlines)
-// ---------------------------------------------------------------------------
-function parseCSV(text) {
-  const rows = []; let row = [], field = "", inQ = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inQ) {
-      if (ch === '"' && text[i+1] === '"') { field += '"'; i++; }
-      else if (ch === '"') inQ = false;
-      else field += ch;
-    } else {
-      if (ch === '"') inQ = true;
-      else if (ch === ',') { row.push(field); field = ""; }
-      else if (ch === '\n' || (ch === '\r' && text[i+1] === '\n')) {
-        row.push(field); field = ""; rows.push(row); row = [];
-        if (ch === '\r') i++;
-      } else if (ch === '\r') {
-        row.push(field); field = ""; rows.push(row); row = [];
-      } else field += ch;
-    }
-  }
-  if (field || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
-
-// ---------------------------------------------------------------------------
 // Date helpers — sheet stores DD/MM/YYYY text
 // ---------------------------------------------------------------------------
 function parseDMY(s) {
   if (!s) return null;
-  s = s.trim();
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  s = String(s).trim();
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!m) return null;
   return m[3] + "-" + m[2].padStart(2,"0") + "-" + m[1].padStart(2,"0");
 }
+
+function pad2(n) { return n < 10 ? "0" + n : String(n); }
 
 function dBetween(a, b) { return Math.round((b - a) / 864e5); }
 function pD(s) { const p = s.split("-"); return new Date(+p[0], p[1]-1, +p[2]); }
@@ -212,41 +188,59 @@ function nDays() { return dBetween(T0, T1) + 1; }
 function tW() { return nDays() * PPD; }
 
 // ---------------------------------------------------------------------------
-// Transform sheet rows → scenario objects
+// Extract cell value from gviz table row (prefers formatted value for dates)
+// ---------------------------------------------------------------------------
+function gvCell(row, idx) {
+  if (!row.c || idx >= row.c.length || !row.c[idx]) return "";
+  var c = row.c[idx];
+  if (typeof c.f === "string" && c.f) return c.f;
+  if (c.v instanceof Date) {
+    return pad2(c.v.getDate()) + "/" + pad2(c.v.getMonth() + 1) + "/" + c.v.getFullYear();
+  }
+  if (c.v != null) return String(c.v);
+  return "";
+}
+
+// ---------------------------------------------------------------------------
+// Transform gviz table → scenario objects
 // ---------------------------------------------------------------------------
 function padLabel(raw) {
   return raw.replace(/(\d+)$/, function(m) { return m.length === 1 ? "0"+m : m; });
 }
 
-function transformRows(rows) {
-  const out = [];
-  for (let i = 0; i < rows.length; i++) {
-    const r = rows[i];
-    if (!r || r.length < 20) continue;
-    const label = (r[COL.label] || "").trim();
-    if (!label || !label.includes(" - ")) continue;
-    const cust = (r[COL.customer] || "").trim();
+function transformGvizTable(table) {
+  var out = [];
+  if (!table || !table.rows) return out;
+
+  for (var i = 0; i < table.rows.length; i++) {
+    var r = table.rows[i];
+    if (!r || !r.c) continue;
+
+    var label = gvCell(r, COL.label).trim();
+    if (!label || label.indexOf(" - ") === -1) continue;
+
+    var cust = gvCell(r, COL.customer).trim();
     if (!cust.match(/Customer\s+\d/i)) continue;
 
-    let cat;
-    if (label.startsWith("2LAT")) cat = "2lat";
-    else if (label.startsWith("REV"))  cat = "rev";
-    else if (label.startsWith("LAT"))  cat = "lat";
-    else if (label.startsWith("RVSL")) cat = "rvsl";
-    else if (label.startsWith("OTH"))  cat = "oth";
+    var cat;
+    if (label.indexOf("2LAT") === 0) cat = "2lat";
+    else if (label.indexOf("REV") === 0)  cat = "rev";
+    else if (label.indexOf("LAT") === 0)  cat = "lat";
+    else if (label.indexOf("RVSL") === 0) cat = "rvsl";
+    else if (label.indexOf("OTH") === 0)  cat = "oth";
     else continue;
 
-    const shortLabel = padLabel(label.split(" - ")[0].trim());
-    const custNum = parseInt(cust.replace(/\D+/g, ""));
-    const track = (r[COL.track] || "").trim().replace("Fast Track ", "FT ");
-    const desc = (r[COL.desc] || "").trim();
+    var shortLabel = padLabel(label.split(" - ")[0].trim());
+    var custNum = parseInt(cust.replace(/\D+/g, ""));
+    var track = gvCell(r, COL.track).replace("Fast Track ", "FT ");
+    var desc = gvCell(r, COL.desc);
 
-    const c0s = parseDMY(r[COL.c0Open]), c0e = parseDMY(r[COL.c0Due]);
-    const c1s = parseDMY(r[COL.c1Open]), c1e = parseDMY(r[COL.c1Due]);
-    const c2s = parseDMY(r[COL.c2Open]), c2e = parseDMY(r[COL.c2Due]);
+    var c0s = parseDMY(gvCell(r, COL.c0Open)), c0e = parseDMY(gvCell(r, COL.c0Due));
+    var c1s = parseDMY(gvCell(r, COL.c1Open)), c1e = parseDMY(gvCell(r, COL.c1Due));
+    var c2s = parseDMY(gvCell(r, COL.c2Open)), c2e = parseDMY(gvCell(r, COL.c2Due));
     if (!c0s || !c0e) continue;
 
-    const cycles = [[c0s, c0e]];
+    var cycles = [[c0s, c0e]];
     if (c1s && c1e) cycles.push([c1s, c1e]);
     if (c2s && c2e) cycles.push([c2s, c2e]);
 
@@ -274,23 +268,55 @@ function computeRange() {
 }
 
 // ---------------------------------------------------------------------------
-// Fetch live data from Google Sheets
+// Fetch live data via JSONP (bypasses CORS — works from any origin)
 // ---------------------------------------------------------------------------
-async function fetchSheet() {
+var _jsonpScript = null;
+var _jsonpTimeout = null;
+
+function fetchSheet() {
   if (fetching) return;
   fetching = true;
   setStatus("loading", "Fetching data from Google Sheets\u2026");
   document.getElementById("refreshBtn").disabled = true;
 
-  try {
-    const url = "https://docs.google.com/spreadsheets/d/" + SHEET_ID
-      + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID + "&range=A1:BL100";
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const csv = await res.text();
-    const rows = parseCSV(csv);
-    const data = transformRows(rows);
+  _jsonpCleanup();
 
+  _jsonpTimeout = setTimeout(function() {
+    _jsonpCleanup();
+    _onFetchDone("Timeout (15 s)");
+  }, 15000);
+
+  window.google = window.google || {};
+  window.google.visualization = window.google.visualization || {};
+  window.google.visualization.Query = window.google.visualization.Query || {};
+  window.google.visualization.Query.setResponse = function(resp) {
+    _jsonpCleanup();
+    _processGvizResponse(resp);
+  };
+
+  _jsonpScript = document.createElement("script");
+  _jsonpScript.onerror = function() {
+    _jsonpCleanup();
+    _onFetchDone("Network error \u2014 is the sheet shared as \u201cAnyone with the link\u201d?");
+  };
+  _jsonpScript.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID
+    + "/gviz/tq?gid=" + SHEET_GID + "&headers=0&range=A1:BL100&_=" + Date.now();
+  document.head.appendChild(_jsonpScript);
+}
+
+function _jsonpCleanup() {
+  clearTimeout(_jsonpTimeout);
+  if (_jsonpScript && _jsonpScript.parentNode) _jsonpScript.parentNode.removeChild(_jsonpScript);
+  _jsonpScript = null;
+}
+
+function _processGvizResponse(resp) {
+  try {
+    if (resp.status === "error") {
+      var errMsg = (resp.errors && resp.errors[0]) ? resp.errors[0].detailed_message || resp.errors[0].message : "Unknown error";
+      throw new Error(errMsg);
+    }
+    var data = transformGvizTable(resp.table);
     if (data.length > 0) {
       S = data;
       computeRange();
@@ -301,17 +327,23 @@ async function fetchSheet() {
       setStatus("stale", "No scenarios parsed \u2014 showing cached data");
     }
   } catch (err) {
-    const msg = err.message || "Unknown error";
-    if (lastUpdate) {
-      setStatus("stale", "Refresh failed (" + msg + ") \u00b7 Showing data from " + lastUpdate.toLocaleTimeString());
-    } else {
-      setStatus("error", "Could not reach Google Sheets (" + msg + ") \u00b7 Showing built-in snapshot");
-    }
-  } finally {
-    fetching = false;
-    document.getElementById("refreshBtn").disabled = false;
-    scheduleNext();
+    _onFetchDone(err.message);
+    return;
   }
+  _onFetchDone(null);
+}
+
+function _onFetchDone(errMsg) {
+  if (errMsg) {
+    if (lastUpdate) {
+      setStatus("stale", "Refresh failed (" + errMsg + ") \u00b7 Last good update " + lastUpdate.toLocaleTimeString());
+    } else {
+      setStatus("error", errMsg + " \u00b7 Showing built-in snapshot");
+    }
+  }
+  fetching = false;
+  document.getElementById("refreshBtn").disabled = false;
+  scheduleNext();
 }
 
 function manualRefresh() { fetchSheet(); }
@@ -482,4 +514,3 @@ fetchSheet();
 </script>
 </body>
 </html>
-
