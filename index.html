@@ -306,16 +306,17 @@ function render(){
       for(var j=0;j<s.cy.length;j++){
         cyN++;
         var sd=pD(s.cy[j][0]),cd=pD(s.cy[j][1]),ed=pD(s.cy[j][2]);
+        var gs=new Date(cd);gs.setDate(gs.getDate()+1);
         var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
         var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+3;
-        var totalD=dBetween(sd,ed),billD=dBetween(sd,cd);
+        var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
         var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
         var col=CLR[s.c]||CLR.lat;
         var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
         var txt=s.l+" \u2022 Cycle "+cyN+" \u2022 "+fmt(sd)+" \u2013 "+fmt(ed);
         html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
           +' data-l="'+s.l+'" data-c="'+s.c+'" data-t="'+s.t+'" data-d="'+s.d.replace(/"/g,'&quot;')+'"'
-          +' data-n="'+cyN+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-u="'+s.u+'">'
+          +' data-n="'+cyN+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-u="'+s.u+'">'
           +'<span class="bt">'+txt+'</span></div>';
         ri++;
     }}
@@ -330,7 +331,7 @@ document.addEventListener("pointerover",function(e){
   var b=e.target.closest(".bar");if(!b){tt.style.display="none";return}var d=b.dataset;
   tt.innerHTML='<div class="tl">'+d.l+' \u2014 Cycle '+d.n+' (C'+d.j+')</div>'
     +'<div class="tc">'+CN[d.c]+' \u00b7 '+d.t+' \u00b7 Customer '+d.u+'</div>'
-    +'<div class="td">Billing: '+d.s+' \u2013 '+d.m+' &nbsp;\u00b7&nbsp; Grace: '+d.m+' \u2013 '+d.e+'</div>'
+    +'<div class="td">Billing: '+d.s+' \u2013 '+d.m+' &nbsp;\u00b7&nbsp; Grace: '+d.gs+' \u2013 '+d.e+'</div>'
     +'<div class="tp">'+d.d.replace(/</g,"&lt;")+'</div>';
   tt.style.display="block"
 });
