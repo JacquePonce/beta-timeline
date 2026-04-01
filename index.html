@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beta Testing Timeline — Gantt View by Customer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f8f9fa;color:#333;font-size:13px;line-height:1.4}
+
+.top-bar{padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e0e0e0}
+.top-bar h1{font-size:20px;font-weight:600;color:#1a1a1a}
+.top-bar p{font-size:13px;color:#666;margin-top:4px}
+.controls{display:flex;gap:20px;padding:10px 24px;background:#fff;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;align-items:center}
+.legend-title{font-weight:600;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
+.legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.sep{width:1px;height:20px;background:#ddd;margin:0 4px}
+.filter-btn{padding:4px 12px;font-size:12px;border:1px solid #d0d0d0;border-radius:14px;background:#fff;cursor:pointer;color:#555;transition:all .15s}
+.filter-btn:hover{border-color:#999}
+.filter-btn.active{background:#37474f;color:#fff;border-color:#37474f}
+
+.status-bar{display:flex;align-items:center;gap:12px;padding:6px 24px;background:#eceff1;border-bottom:1px solid #cfd8dc;font-size:12px;color:#546e7a}
+.status-bar .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.live{background:#43a047;animation:pulse 2s infinite}
+.dot.stale{background:#ffa726}
+.dot.error{background:#e53935}
+.dot.loading{background:#42a5f5;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.refresh-btn{padding:3px 10px;font-size:11px;border:1px solid #b0bec5;border-radius:10px;background:#fff;cursor:pointer;color:#546e7a;transition:all .15s}
+.refresh-btn:hover{background:#cfd8dc}
+.refresh-btn:disabled{opacity:.5;cursor:not-allowed}
+.countdown{color:#90a4ae;font-size:11px}
+
+.scroll-container{overflow:auto;max-height:calc(100vh - 190px);background:#fff;position:relative}
+.chart-inner{position:relative}
+.header-band{position:sticky;top:0;z-index:15;display:flex;background:#fff;border-bottom:1px solid #d0d0d0}
+.corner{flex:0 0 100px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#78909c;text-transform:uppercase;letter-spacing:.5px;background:#fafafa;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:20}
+.date-cols{position:relative}
+.month-row{display:flex;height:24px;border-bottom:1px solid #f0f0f0}
+.month-cell{display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#37474f;border-left:1px solid #e0e0e0;text-transform:uppercase;letter-spacing:.5px}
+.month-cell:first-child{border-left:none}
+.day-row{display:flex;height:28px}
+.week-cell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;border-left:1px solid #f0f0f0}
+.week-cell.mon-start{border-left:1px solid #ccc;color:#666;font-weight:600}
+
+.cust-row{display:flex}
+.cust-label{flex:0 0 100px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#37474f;background:#fafafa;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10;border-bottom:1px solid #eee}
+.cust-gantt{position:relative;border-bottom:1px solid #eee}
+.cust-sep{display:flex;height:6px}
+.cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
+.cust-sep-right{flex:1;background:#f0f0f0}
+
+.gridline{position:absolute;top:0;bottom:0;width:1px;z-index:0;pointer-events:none}
+.gridline.gl-month{background:rgba(0,0,0,.1)}
+.gridline.gl-week{background:rgba(0,0,0,.04)}
+
+.bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1}
+.bar:hover{filter:brightness(.88);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
+.bar .bt{overflow:hidden;text-overflow:ellipsis}
+.bar.c-rev,.bar.c-2lat{background:#7cb342}
+.bar.c-lat{background:#78909c}
+.bar.c-rvsl,.bar.c-oth{background:#90a4ae}
+
+.tooltip{position:fixed;max-width:360px;padding:10px 14px;background:#263238;color:#eceff1;border-radius:6px;font-size:12px;line-height:1.5;pointer-events:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none}
+.tooltip .tl{font-weight:700;font-size:13px;margin-bottom:2px}
+.tooltip .tc{font-size:11px;color:#90a4ae;text-transform:uppercase;letter-spacing:.4px}
+.tooltip .td{margin-top:6px;font-size:11px;color:#80cbc4}
+.tooltip .tp{margin-top:6px;color:#b0bec5;font-size:11px;white-space:pre-line}
+
+.loading-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.8);z-index:50;font-size:14px;color:#546e7a}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Beta Testing Timeline — Cycle View by Customer</h1>
+  <p>E2E Beta Testing scenarios &middot; All 3 billing cycles per scenario &middot; Live from Google Sheets</p>
+</div>
+
+<div class="status-bar" id="statusBar">
+  <span class="dot loading" id="statusDot"></span>
+  <span id="statusText">Loading data from Google Sheets&hellip;</span>
+  <span class="countdown" id="countdownText"></span>
+  <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">Refresh now</button>
+</div>
+
+<div class="controls">
+  <span class="legend-title">Categories</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:#7cb342"></span>REV / 2LAT</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:#78909c"></span>LAT</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:#90a4ae"></span>RVSL / OTH</span>
+  <span class="sep"></span>
+  <span class="legend-title">Filter</span>
+  <button class="filter-btn active" data-cat="all">All</button>
+  <button class="filter-btn" data-cat="rev">REV</button>
+  <button class="filter-btn" data-cat="lat">LAT</button>
+  <button class="filter-btn" data-cat="2lat">2LAT</button>
+  <button class="filter-btn" data-cat="rvsl">RVSL</button>
+  <button class="filter-btn" data-cat="oth">OTH</button>
+</div>
+
+<div class="scroll-container" id="sc"></div>
+<div class="tooltip" id="tt"></div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
+const SHEET_ID  = "1EFOaXjphqTGXcQLI-TR7p4h7EY4PfAl3sptwbSZwVDg";
+const SHEET_GID = "1006529842";
+const REFRESH_MS = 5 * 60 * 1000;
+
+// Column indices in the sheet (0-based)
+const COL = { label:1, desc:2, customer:4, track:5, c0Open:17, c0Due:20, c1Open:33, c1Due:36, c2Open:49, c2Due:52 };
+
+// ---------------------------------------------------------------------------
+// Hardcoded fallback (used until first successful fetch)
+// ---------------------------------------------------------------------------
+const FALLBACK = [
+  {l:"REV 01",c:"rev",u:1,t:"FT 1.0",d:"Revolver \u2192 Keeps revolving",cy:[["2026-06-01","2026-06-09"],["2026-06-06","2026-06-14"],["2026-06-11","2026-06-19"]]},
+  {l:"REV 02",c:"rev",u:6,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving",cy:[["2026-06-22","2026-07-06"],["2026-06-30","2026-07-14"],["2026-07-08","2026-07-22"]]},
+  {l:"REV 03",c:"rev",u:5,t:"FT 1.0",d:"Revolver (partial payments) \u2192 Leaves revolving",cy:[["2026-06-22","2026-06-30"],["2026-06-27","2026-07-05"],["2026-07-02","2026-07-10"]]},
+  {l:"REV 04",c:"rev",u:2,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (partial payments)",cy:[["2026-06-05","2026-06-13"],["2026-06-10","2026-06-18"],["2026-06-15","2026-06-23"]]},
+  {l:"REV 05",c:"rev",u:4,t:"FT 1.0",d:"Revolver \u2192 Keeps revolving \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-09","2026-06-17"],["2026-06-14","2026-06-22"],["2026-06-19","2026-06-27"]]},
+  {l:"REV 06",c:"rev",u:7,t:"FT 2.0",d:"Revolver \u2192 Keeps revolving \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-22","2026-07-06"],["2026-06-30","2026-07-14"],["2026-07-08","2026-07-22"]]},
+  {l:"REV 07",c:"rev",u:3,t:"FT 1.0",d:"Revolver \u2192 Keeps revolving \u2192 Leaves revolving (mid cycle) \u2192 Revolver",cy:[["2026-06-08","2026-06-16"],["2026-06-13","2026-06-21"],["2026-06-18","2026-06-26"]]},
+  {l:"LAT 08",c:"lat",u:2,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-15","2026-06-23"],["2026-06-20","2026-06-28"],["2026-06-25","2026-07-03"]]},
+  {l:"LAT 09",c:"lat",u:3,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-18","2026-06-26"],["2026-06-23","2026-07-01"],["2026-06-28","2026-07-06"]]},
+  {l:"LAT 10",c:"lat",u:5,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-28","2026-07-06"],["2026-07-03","2026-07-11"],["2026-07-08","2026-07-16"]]},
+  {l:"LAT 11",c:"lat",u:6,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-28","2026-07-12"],["2026-07-06","2026-07-20"],["2026-07-14","2026-07-28"]]},
+  {l:"LAT 12",c:"lat",u:4,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-19","2026-06-27"],["2026-06-24","2026-07-02"],["2026-06-29","2026-07-07"]]},
+  {l:"LAT 13",c:"lat",u:8,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-15","2026-06-29"],["2026-06-23","2026-07-07"],["2026-07-01","2026-07-15"]]},
+  {l:"LAT 14",c:"lat",u:7,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-07-01","2026-07-15"],["2026-07-09","2026-07-23"],["2026-07-17","2026-07-31"]]},
+  {l:"LAT 15",c:"lat",u:9,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-07-10","2026-07-24"],["2026-07-18","2026-08-01"],["2026-07-26","2026-08-09"]]},
+  {l:"LAT 16",c:"lat",u:9,t:"FT 2.0",d:"Late & Revolver \u2192 Late Fee Waived \u2192 Leaves late",cy:[["2026-07-19","2026-08-02"],["2026-07-27","2026-08-10"],["2026-08-04","2026-08-18"]]},
+  {l:"2LAT 17",c:"2lat",u:5,t:"FT 1.0",d:"Late & Revolver \u2192 Keeps late & revolving \u2192 Current",cy:[["2026-07-04","2026-07-12"],["2026-07-09","2026-07-17"],["2026-07-14","2026-07-22"]]},
+  {l:"2LAT 18",c:"2lat",u:6,t:"FT 2.0",d:"Late & Revolver \u2192 Keeps late & revolving",cy:[["2026-07-04","2026-07-18"],["2026-07-12","2026-07-26"],["2026-07-20","2026-08-03"]]},
+  {l:"2LAT 19",c:"2lat",u:1,t:"FT 1.0",d:"Late & Revolver \u2192 Keeps late & revolving",cy:[["2026-06-16","2026-06-24"],["2026-06-21","2026-06-29"],["2026-06-26","2026-07-04"]]},
+  {l:"2LAT 20",c:"2lat",u:2,t:"FT 1.0",d:"Late & Revolver \u2192 Late Fee Waived \u2192 Keeps late",cy:[["2026-06-25","2026-07-03"],["2026-06-30","2026-07-08"],["2026-07-05","2026-07-13"]]},
+  {l:"RVSL 21",c:"rvsl",u:3,t:"FT 1.0",d:"Reversal same cycle - not revolver",cy:[["2026-06-28","2026-07-06"],["2026-07-03","2026-07-11"],["2026-07-08","2026-07-16"]]},
+  {l:"RVSL 22",c:"rvsl",u:4,t:"FT 1.0",d:"Reversal same cycle - single purchase",cy:[["2026-06-29","2026-07-07"],["2026-07-04","2026-07-12"],["2026-07-09","2026-07-17"]]},
+  {l:"RVSL 23",c:"rvsl",u:8,t:"FT 2.0",d:"Reversal same cycle - bill < $25",cy:[["2026-06-25","2026-07-09"],["2026-07-03","2026-07-17"],["2026-07-11","2026-07-25"]]},
+  {l:"RVSL 24",c:"rvsl",u:1,t:"FT 1.0",d:"Reversal different cycle - prepaid balance",cy:[["2026-07-01","2026-07-09"],["2026-07-06","2026-07-14"],["2026-07-11","2026-07-19"]]},
+  {l:"RVSL 25",c:"rvsl",u:3,t:"FT 1.0",d:"Reversal same cycle - revolver",cy:[["2026-07-03","2026-07-11"],["2026-07-08","2026-07-16"],["2026-07-13","2026-07-21"]]},
+  {l:"RVSL 26",c:"rvsl",u:4,t:"FT 1.0",d:"Reversal different cycle - late",cy:[["2026-07-09","2026-07-17"],["2026-07-14","2026-07-22"],["2026-07-19","2026-07-27"]]},
+  {l:"RVSL 27",c:"rvsl",u:5,t:"FT 1.0",d:"Reversal different cycle - reversal > outstanding",cy:[["2026-07-13","2026-07-21"],["2026-07-18","2026-07-26"],["2026-07-23","2026-07-31"]]},
+  {l:"RVSL 28",c:"rvsl",u:6,t:"FT 2.0",d:"Partial reversals",cy:[["2026-07-13","2026-07-27"],["2026-07-21","2026-08-04"],["2026-07-29","2026-08-12"]]},
+  {l:"RVSL 29",c:"rvsl",u:7,t:"FT 2.0",d:"Partial reversals - interest reversal",cy:[["2026-07-07","2026-07-21"],["2026-07-15","2026-07-29"],["2026-07-23","2026-08-06"]]},
+  {l:"OTH 30",c:"oth",u:2,t:"FT 1.0",d:"Usage of prepaid balance for new purchases",cy:[["2026-07-11","2026-07-19"],["2026-07-16","2026-07-24"],["2026-07-21","2026-07-29"]]},
+  {l:"OTH 31",c:"oth",u:1,t:"FT 1.0",d:"Overlimit balance",cy:[["2026-07-10","2026-07-18"],["2026-07-15","2026-07-23"],["2026-07-20","2026-07-28"]]},
+  {l:"OTH 32",c:"oth",u:3,t:"FT 1.0",d:"Manual adjustment",cy:[["2026-07-13","2026-07-21"],["2026-07-18","2026-07-26"],["2026-07-23","2026-07-31"]]}
+];
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+let S = FALLBACK;
+let T0 = new Date(2026, 5, 1);
+let T1 = new Date(2026, 7, 18);
+let filt = "all";
+let lastUpdate = null;
+let fetching = false;
+let nextRefreshAt = 0;
+let countdownTimer = null;
+
+const PPD = 16, BH = 28, CW = 100;
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
+
+// ---------------------------------------------------------------------------
+// CSV parsing (handles quoted fields with commas / newlines)
+// ---------------------------------------------------------------------------
+function parseCSV(text) {
+  const rows = []; let row = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (ch === '"') inQ = false;
+      else field += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { row.push(field); field = ""; }
+      else if (ch === '\n' || (ch === '\r' && text[i+1] === '\n')) {
+        row.push(field); field = ""; rows.push(row); row = [];
+        if (ch === '\r') i++;
+      } else if (ch === '\r') {
+        row.push(field); field = ""; rows.push(row); row = [];
+      } else field += ch;
+    }
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Date helpers — sheet stores DD/MM/YYYY text
+// ---------------------------------------------------------------------------
+function parseDMY(s) {
+  if (!s) return null;
+  s = s.trim();
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  return m[3] + "-" + m[2].padStart(2,"0") + "-" + m[1].padStart(2,"0");
+}
+
+function dBetween(a, b) { return Math.round((b - a) / 864e5); }
+function pD(s) { const p = s.split("-"); return new Date(+p[0], p[1]-1, +p[2]); }
+function fmt(d) { return MN[d.getMonth()] + " " + d.getDate(); }
+function nDays() { return dBetween(T0, T1) + 1; }
+function tW() { return nDays() * PPD; }
+
+// ---------------------------------------------------------------------------
+// Transform sheet rows → scenario objects
+// ---------------------------------------------------------------------------
+function padLabel(raw) {
+  return raw.replace(/(\d+)$/, function(m) { return m.length === 1 ? "0"+m : m; });
+}
+
+function transformRows(rows) {
+  const out = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.length < 20) continue;
+    const label = (r[COL.label] || "").trim();
+    if (!label || !label.includes(" - ")) continue;
+    const cust = (r[COL.customer] || "").trim();
+    if (!cust.match(/Customer\s+\d/i)) continue;
+
+    let cat;
+    if (label.startsWith("2LAT")) cat = "2lat";
+    else if (label.startsWith("REV"))  cat = "rev";
+    else if (label.startsWith("LAT"))  cat = "lat";
+    else if (label.startsWith("RVSL")) cat = "rvsl";
+    else if (label.startsWith("OTH"))  cat = "oth";
+    else continue;
+
+    const shortLabel = padLabel(label.split(" - ")[0].trim());
+    const custNum = parseInt(cust.replace(/\D+/g, ""));
+    const track = (r[COL.track] || "").trim().replace("Fast Track ", "FT ");
+    const desc = (r[COL.desc] || "").trim();
+
+    const c0s = parseDMY(r[COL.c0Open]), c0e = parseDMY(r[COL.c0Due]);
+    const c1s = parseDMY(r[COL.c1Open]), c1e = parseDMY(r[COL.c1Due]);
+    const c2s = parseDMY(r[COL.c2Open]), c2e = parseDMY(r[COL.c2Due]);
+    if (!c0s || !c0e) continue;
+
+    const cycles = [[c0s, c0e]];
+    if (c1s && c1e) cycles.push([c1s, c1e]);
+    if (c2s && c2e) cycles.push([c2s, c2e]);
+
+    out.push({ l:shortLabel, c:cat, u:custNum, t:track, d:desc, cy:cycles });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Compute timeline bounds from data
+// ---------------------------------------------------------------------------
+function computeRange() {
+  let mn = Infinity, mx = -Infinity;
+  for (const s of S) {
+    for (const [a, b] of s.cy) {
+      const ta = pD(a).getTime(), tb = pD(b).getTime();
+      if (ta < mn) mn = ta;
+      if (tb > mx) mx = tb;
+    }
+  }
+  if (mn !== Infinity) {
+    T0 = new Date(mn);
+    T1 = new Date(mx);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Fetch live data from Google Sheets
+// ---------------------------------------------------------------------------
+async function fetchSheet() {
+  if (fetching) return;
+  fetching = true;
+  setStatus("loading", "Fetching data from Google Sheets\u2026");
+  document.getElementById("refreshBtn").disabled = true;
+
+  try {
+    const url = "https://docs.google.com/spreadsheets/d/" + SHEET_ID
+      + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID + "&range=A1:BL100";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const csv = await res.text();
+    const rows = parseCSV(csv);
+    const data = transformRows(rows);
+
+    if (data.length > 0) {
+      S = data;
+      computeRange();
+      render();
+      lastUpdate = new Date();
+      setStatus("live", "Live \u00b7 " + data.length + " scenarios \u00b7 Updated " + lastUpdate.toLocaleTimeString());
+    } else {
+      setStatus("stale", "No scenarios parsed \u2014 showing cached data");
+    }
+  } catch (err) {
+    const msg = err.message || "Unknown error";
+    if (lastUpdate) {
+      setStatus("stale", "Refresh failed (" + msg + ") \u00b7 Showing data from " + lastUpdate.toLocaleTimeString());
+    } else {
+      setStatus("error", "Could not reach Google Sheets (" + msg + ") \u00b7 Showing built-in snapshot");
+    }
+  } finally {
+    fetching = false;
+    document.getElementById("refreshBtn").disabled = false;
+    scheduleNext();
+  }
+}
+
+function manualRefresh() { fetchSheet(); }
+
+// ---------------------------------------------------------------------------
+// Refresh scheduling + countdown
+// ---------------------------------------------------------------------------
+function scheduleNext() {
+  nextRefreshAt = Date.now() + REFRESH_MS;
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(tickCountdown, 1000);
+}
+
+function tickCountdown() {
+  const rem = Math.max(0, Math.round((nextRefreshAt - Date.now()) / 1000));
+  const m = Math.floor(rem / 60), ss = String(rem % 60).padStart(2, "0");
+  document.getElementById("countdownText").textContent = "Next refresh in " + m + ":" + ss;
+  if (rem <= 0) { clearInterval(countdownTimer); fetchSheet(); }
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById("statusDot");
+  dot.className = "dot " + state;
+  document.getElementById("statusText").textContent = text;
+}
+
+// ---------------------------------------------------------------------------
+// Render (same Gantt logic, now using dynamic T0/T1)
+// ---------------------------------------------------------------------------
+function group(f) {
+  const g = {};
+  for (const s of S) {
+    if (f !== "all" && s.c !== f) continue;
+    (g[s.u] || (g[s.u] = [])).push(s);
+  }
+  for (const k in g) g[k].sort((a, b) => pD(a.cy[0][0]) - pD(b.cy[0][0]));
+  return g;
+}
+
+function render() {
+  const sc = document.getElementById("sc");
+  const g = group(filt);
+  const w = tW();
+  const custs = Object.keys(g).map(Number).sort((a, b) => a - b);
+
+  if (custs.length === 0) {
+    sc.innerHTML = '<div style="padding:40px;text-align:center;color:#90a4ae">No scenarios to display.</div>';
+    return;
+  }
+
+  let html = '<div class="chart-inner" style="width:' + (CW + w) + 'px">';
+
+  // Header
+  html += '<div class="header-band">';
+  html += '<div class="corner">Customer</div>';
+  html += '<div class="date-cols" style="width:' + w + 'px">';
+
+  html += '<div class="month-row">';
+  const spans = [];
+  let cur = new Date(T0), pm = -1, ms = 0;
+  while (cur <= T1) {
+    const m = cur.getMonth();
+    if (m !== pm) { if (pm !== -1) spans.push({m:pm, s:ms, e:dBetween(T0, cur)}); ms = dBetween(T0, cur); pm = m; }
+    cur.setDate(cur.getDate() + 1);
+  }
+  spans.push({m:pm, s:ms, e:nDays()});
+  for (const sp of spans) html += '<div class="month-cell" style="width:' + ((sp.e - sp.s) * PPD) + 'px">' + MN[sp.m] + ' ' + T0.getFullYear() + '</div>';
+  html += '</div>';
+
+  html += '<div class="day-row">';
+  cur = new Date(T0);
+  while (cur <= T1) {
+    const isMS = cur.getDate() === 1;
+    const isMon = cur.getDay() === 1;
+    html += '<div class="' + (isMS ? "week-cell mon-start" : "week-cell") + '" style="width:' + PPD + 'px">' + ((isMon || isMS) ? cur.getDate() : "") + '</div>';
+    cur.setDate(cur.getDate() + 1);
+  }
+  html += '</div></div></div>';
+
+  // Customer rows
+  for (let ci = 0; ci < custs.length; ci++) {
+    const cid = custs[ci];
+    const list = g[cid];
+    let rows = 0;
+    for (const s of list) rows += s.cy.length;
+    const h = rows * BH;
+
+    html += '<div class="cust-row">';
+    html += '<div class="cust-label" style="height:' + h + 'px">' + cid + '</div>';
+    html += '<div class="cust-gantt" style="width:' + w + 'px;height:' + h + 'px">';
+
+    cur = new Date(T0);
+    while (cur <= T1) {
+      const dd = dBetween(T0, cur);
+      if (cur.getDate() === 1) html += '<div class="gridline gl-month" style="left:' + (dd*PPD) + 'px"></div>';
+      else if (cur.getDay() === 1) html += '<div class="gridline gl-week" style="left:' + (dd*PPD) + 'px"></div>';
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    let ri = 0, cyN = 0;
+    for (const s of list) {
+      for (let j = 0; j < s.cy.length; j++) {
+        cyN++;
+        const sd = pD(s.cy[j][0]), ed = pD(s.cy[j][1]);
+        const off = dBetween(T0, sd);
+        const span = dBetween(sd, ed) + 1;
+        const left = off * PPD;
+        const bw = Math.max(span * PPD - 4, 20);
+        const top = ri * BH + 3;
+        const txt = s.l + " \u2022 Cycle " + cyN + " \u2022 " + fmt(sd) + " \u2013 " + fmt(ed);
+        html += '<div class="bar c-' + s.c + '" style="left:' + left + 'px;width:' + bw + 'px;top:' + top + 'px"'
+          + ' data-l="' + s.l + '" data-c="' + s.c + '" data-t="' + s.t + '" data-d="' + s.d.replace(/"/g, '&quot;') + '"'
+          + ' data-n="' + cyN + '" data-j="' + j + '" data-s="' + fmt(sd) + '" data-e="' + fmt(ed) + '" data-u="' + s.u + '">'
+          + '<span class="bt">' + txt + '</span></div>';
+        ri++;
+      }
+    }
+    html += '</div></div>';
+    if (ci < custs.length - 1) html += '<div class="cust-sep"><div class="cust-sep-left"></div><div class="cust-sep-right" style="width:' + w + 'px"></div></div>';
+  }
+
+  html += '</div>';
+  sc.innerHTML = html;
+}
+
+// ---------------------------------------------------------------------------
+// Tooltip
+// ---------------------------------------------------------------------------
+const tt = document.getElementById("tt");
+document.addEventListener("pointerover", function(e) {
+  const b = e.target.closest(".bar");
+  if (!b) { tt.style.display = "none"; return; }
+  const d = b.dataset;
+  tt.innerHTML = '<div class="tl">' + d.l + ' \u2014 Cycle ' + d.n + ' (C' + d.j + ')</div>'
+    + '<div class="tc">' + CN[d.c] + ' \u00b7 ' + d.t + ' \u00b7 Customer ' + d.u + '</div>'
+    + '<div class="td">' + d.s + ' \u2013 ' + d.e + '</div>'
+    + '<div class="tp">' + d.d.replace(/</g,"&lt;") + '</div>';
+  tt.style.display = "block";
+});
+document.addEventListener("pointermove", function(e) {
+  if (tt.style.display !== "block") return;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + tt.offsetWidth > innerWidth - 10) x = e.clientX - tt.offsetWidth - 10;
+  if (y + tt.offsetHeight > innerHeight - 10) y = e.clientY - tt.offsetHeight - 10;
+  tt.style.left = x + "px"; tt.style.top = y + "px";
+});
+document.addEventListener("pointerout", function(e) {
+  if (e.target.closest(".bar") && !e.relatedTarget?.closest(".bar")) tt.style.display = "none";
+});
+
+// ---------------------------------------------------------------------------
+// Filters
+// ---------------------------------------------------------------------------
+document.querySelectorAll(".filter-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll(".filter-btn").forEach(function(b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+    filt = btn.dataset.cat;
+    render();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Boot: render fallback immediately, then start live fetching
+// ---------------------------------------------------------------------------
+render();
+fetchSheet();
+</script>
+</body>
+</html>
