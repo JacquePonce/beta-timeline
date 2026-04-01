@@ -53,16 +53,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
 .cust-sep-right{flex:1;background:#f0f0f0}
 
-.day-bg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
-.day-bg.bg-we{background:rgba(0,0,0,.06)}
-.day-bg.bg-br{background:rgba(126,87,194,.18)}
-.day-bg.bg-us{background:rgba(233,30,99,.14)}
+.day-mark{position:absolute;top:0;bottom:0;width:0;pointer-events:none;z-index:0}
+.day-mark.dm-we{border-left:1px dashed rgba(0,0,0,.22)}
+.day-mark.dm-br{border-left:2px dashed rgba(126,87,194,.55)}
+.day-mark.dm-us{border-left:2px dashed rgba(230,140,0,.6)}
 .gridline{position:absolute;top:0;bottom:0;width:1px;z-index:0;pointer-events:none}
 .gridline.gl-month{background:rgba(0,0,0,.1)}
 .gridline.gl-week{background:rgba(0,0,0,.04)}
-.wc-we{background:rgba(0,0,0,.06)}
-.wc-br{background:rgba(126,87,194,.18)}
-.wc-us{background:rgba(233,30,99,.14)}
+.wc-we{background:rgba(0,0,0,.04)}
+.wc-br{background:rgba(126,87,194,.1)}
+.wc-us{background:rgba(230,140,0,.1)}
 
 .bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .bar:hover{filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
@@ -100,9 +100,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <span class="phase-legend"><span class="phase-swatch" style="background:#455a64"></span>Billing (open&rarr;close)</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:#b0bec5"></span>Grace (close&rarr;due)</span>
   <span class="sep"></span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.06)"></span>Weekend</span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(126,87,194,.22);border-color:rgba(126,87,194,.4)"></span>BR Holiday</span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(233,30,99,.18);border-color:rgba(233,30,99,.4)"></span>US Holiday</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(0,0,0,.25)"></span>Weekend</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(126,87,194,.6)"></span>BR Holiday</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(230,140,0,.65)"></span>US Holiday</span>
   <span class="sep"></span>
   <span class="legend-title">Filter</span>
   <button class="filter-btn active" data-cat="all">All</button>
@@ -135,12 +135,12 @@ var CLR = {
 // Cycle format: [open, close, due]
 var FALLBACK = [
   {l:"REV 01",c:"rev",u:1,t:"FT 1.0",d:"Revolver \u2192 Keeps revolving",cy:[["2026-06-01","2026-06-05","2026-06-09"],["2026-06-06","2026-06-10","2026-06-14"],["2026-06-11","2026-06-15","2026-06-19"]]},
-  {l:"REV 02",c:"rev",u:6,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving",cy:[["2026-06-19","2026-06-26","2026-07-03"],["2026-06-27","2026-07-04","2026-07-11"]]},
-  {l:"REV 03",c:"rev",u:5,t:"FT 1.0",d:"Revolver (partial) \u2192 Leaves revolving",cy:[["2026-06-19","2026-06-23","2026-06-27"],["2026-06-24","2026-06-28","2026-07-02"],["2026-06-29","2026-07-03","2026-07-07"]]},
-  {l:"REV 04",c:"rev",u:2,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (partial)",cy:[["2026-06-05","2026-06-09","2026-06-13"],["2026-06-10","2026-06-14","2026-06-18"],["2026-06-15","2026-06-19","2026-06-23"]]},
-  {l:"REV 05",c:"rev",u:4,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-09","2026-06-13","2026-06-17"],["2026-06-14","2026-06-18","2026-06-22"],["2026-06-19","2026-06-23","2026-06-27"]]},
-  {l:"REV 06",c:"rev",u:7,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-22","2026-06-29","2026-07-06"],["2026-06-30","2026-07-07","2026-07-14"],["2026-07-08","2026-07-15","2026-07-22"]]},
-  {l:"REV 07",c:"rev",u:3,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving \u2192 Revolver",cy:[["2026-06-08","2026-06-12","2026-06-16"],["2026-06-13","2026-06-17","2026-06-21"],["2026-06-18","2026-06-22","2026-06-26"]]},
+  {l:"REV 02",c:"rev",u:6,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving",cy:[["2026-06-20","2026-06-27","2026-07-04"],["2026-06-28","2026-07-05","2026-07-12"]]},
+  {l:"REV 03",c:"rev",u:5,t:"FT 1.0",d:"Revolver (partial) \u2192 Leaves revolving",cy:[["2026-06-20","2026-06-24","2026-06-28"],["2026-06-25","2026-06-29","2026-07-03"]]},
+  {l:"REV 04",c:"rev",u:2,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (partial)",cy:[["2026-06-15","2026-06-19","2026-06-23"],["2026-06-20","2026-06-24","2026-06-28"]]},
+  {l:"REV 05",c:"rev",u:4,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-15","2026-06-19","2026-06-23"],["2026-06-20","2026-06-24","2026-06-28"]]},
+  {l:"REV 06",c:"rev",u:7,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-06-20","2026-06-27","2026-07-04"],["2026-06-28","2026-07-05","2026-07-12"],["2026-07-08","2026-07-15","2026-07-22"]]},
+  {l:"REV 07",c:"rev",u:3,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving \u2192 Revolver",cy:[["2026-06-15","2026-06-19","2026-06-23"],["2026-06-20","2026-06-24","2026-06-28"],["2026-06-25","2026-06-29","2026-07-03"]]},
   {l:"LAT 08",c:"lat",u:2,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-15","2026-06-19","2026-06-23"],["2026-06-20","2026-06-24","2026-06-28"],["2026-06-25","2026-06-29","2026-07-03"]]},
   {l:"LAT 09",c:"lat",u:3,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-18","2026-06-22","2026-06-26"],["2026-06-23","2026-06-27","2026-07-01"],["2026-06-28","2026-07-02","2026-07-06"]]},
   {l:"LAT 10",c:"lat",u:5,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-28","2026-07-02","2026-07-06"],["2026-07-03","2026-07-07","2026-07-11"],["2026-07-08","2026-07-12","2026-07-16"]]},
@@ -323,7 +323,7 @@ function render(){
     html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+cid+'</div>';
     html+='<div class="cust-gantt" style="width:'+w+'px;height:'+h+'px">';
     cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);var dty=dayType(cur);
-    if(dty)html+='<div class="day-bg bg-'+dty+'" style="left:'+(dd*PPD)+'px;width:'+PPD+'px"></div>';
+    if(dty)html+='<div class="day-mark dm-'+dty+'" style="left:'+(dd*PPD+Math.floor(PPD/2))+'px"></div>';
     if(cur.getDate()===1)html+='<div class="gridline gl-month" style="left:'+(dd*PPD)+'px"></div>';
     else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
     cur.setDate(cur.getDate()+1)}
