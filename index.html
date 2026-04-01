@@ -53,9 +53,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
 .cust-sep-right{flex:1;background:#f0f0f0}
 
+.day-bg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
+.day-bg.bg-we{background:rgba(0,0,0,.06)}
+.day-bg.bg-br{background:rgba(126,87,194,.18)}
+.day-bg.bg-us{background:rgba(233,30,99,.14)}
 .gridline{position:absolute;top:0;bottom:0;width:1px;z-index:0;pointer-events:none}
 .gridline.gl-month{background:rgba(0,0,0,.1)}
 .gridline.gl-week{background:rgba(0,0,0,.04)}
+.wc-we{background:rgba(0,0,0,.06)}
+.wc-br{background:rgba(126,87,194,.18)}
+.wc-us{background:rgba(233,30,99,.14)}
 
 .bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .bar:hover{filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
@@ -92,6 +99,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <span class="sep"></span>
   <span class="phase-legend"><span class="phase-swatch" style="background:#455a64"></span>Billing (open&rarr;close)</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:#b0bec5"></span>Grace (close&rarr;due)</span>
+  <span class="sep"></span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.06)"></span>Weekend</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(126,87,194,.22);border-color:rgba(126,87,194,.4)"></span>BR Holiday</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(233,30,99,.18);border-color:rgba(233,30,99,.4)"></span>US Holiday</span>
   <span class="sep"></span>
   <span class="legend-title">Filter</span>
   <button class="filter-btn active" data-cat="all">All</button>
@@ -168,6 +179,19 @@ var countdownTimer = null;
 var PPD = 16, BH = 28, CW = 100;
 var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
+
+var HOL_BR = {"2026-06-04":"Corpus Christi"};
+var HOL_US = {"2026-06-19":"Juneteenth","2026-07-03":"Independence Day (obs)"};
+
+function dayKey(d){return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
+function dayType(d){
+  var k=dayKey(d);
+  if(HOL_BR[k])return "br";
+  if(HOL_US[k])return "us";
+  var dow=d.getDay();if(dow===0||dow===6)return "we";
+  return null;
+}
+function dayLabel(d){var k=dayKey(d);return HOL_BR[k]||HOL_US[k]||null}
 
 function parseDMY(s) {
   if (!s) return null; s = String(s).trim();
@@ -287,7 +311,9 @@ function render(){
   for(var si=0;si<spans.length;si++)html+='<div class="month-cell" style="width:'+((spans[si].e-spans[si].s)*PPD)+'px">'+MN[spans[si].m]+' '+T0.getFullYear()+'</div>';
   html+='</div><div class="day-row">';
   cur=new Date(T0);while(cur<=T1){var isMS=cur.getDate()===1,isMon=cur.getDay()===1;
-  html+='<div class="'+(isMS?"week-cell mon-start":"week-cell")+'" style="width:'+PPD+'px">'+((isMon||isMS)?cur.getDate():"")+'</div>';cur.setDate(cur.getDate()+1)}
+  var dt=dayType(cur),dcls=isMS?"week-cell mon-start":"week-cell";if(dt)dcls+=" wc-"+dt;
+  var dtip=dayLabel(cur);var dtipAttr=dtip?' title="'+dtip+'"':'';
+  html+='<div class="'+dcls+'"'+dtipAttr+' style="width:'+PPD+'px">'+((isMon||isMS)?cur.getDate():"")+'</div>';cur.setDate(cur.getDate()+1)}
   html+='</div></div></div>';
 
   for(var ci=0;ci<custs.length;ci++){
@@ -296,7 +322,8 @@ function render(){
     var h=rows*BH;
     html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+cid+'</div>';
     html+='<div class="cust-gantt" style="width:'+w+'px;height:'+h+'px">';
-    cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);
+    cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);var dty=dayType(cur);
+    if(dty)html+='<div class="day-bg bg-'+dty+'" style="left:'+(dd*PPD)+'px;width:'+PPD+'px"></div>';
     if(cur.getDate()===1)html+='<div class="gridline gl-month" style="left:'+(dd*PPD)+'px"></div>';
     else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
     cur.setDate(cur.getDate()+1)}
