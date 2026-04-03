@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staging Beta Testing Timeline — Cycle View by Customer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f8f9fa;color:#333;font-size:13px;line-height:1.4}
+
+.top-bar{padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e0e0e0}
+.top-bar h1{font-size:20px;font-weight:600;color:#1a1a1a}
+.top-bar p{font-size:13px;color:#666;margin-top:4px}
+.controls{display:flex;gap:16px;padding:10px 24px;background:#fff;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;align-items:center}
+.legend-title{font-weight:600;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
+.legend-swatch{width:28px;height:14px;border-radius:3px;flex-shrink:0}
+.sep{width:1px;height:20px;background:#ddd;margin:0 4px}
+.filter-btn{padding:4px 12px;font-size:12px;border:1px solid #d0d0d0;border-radius:14px;background:#fff;cursor:pointer;color:#555;transition:all .15s}
+.filter-btn:hover{border-color:#999}
+.filter-btn.active{background:#37474f;color:#fff;border-color:#37474f}
+.phase-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#888}
+.phase-swatch{width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.15)}
+
+.scroll-container{overflow:auto;max-height:calc(100vh - 170px);background:#fff;position:relative}
+.chart-inner{position:relative}
+.header-band{position:sticky;top:0;z-index:15;display:flex;background:#fff;border-bottom:1px solid #d0d0d0}
+.corner{flex:0 0 100px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#78909c;text-transform:uppercase;letter-spacing:.5px;background:#fafafa;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:20}
+.date-cols{position:relative}
+.month-row{display:flex;height:24px;border-bottom:1px solid #f0f0f0}
+.month-cell{display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#37474f;border-left:1px solid #e0e0e0;text-transform:uppercase;letter-spacing:.5px}
+.month-cell:first-child{border-left:none}
+.wday-row{display:flex;height:16px;border-bottom:1px solid #f0f0f0}
+.wday-cell{display:flex;align-items:center;justify-content:center;font-size:9px;color:#b0b0b0;letter-spacing:.3px;text-transform:uppercase}
+.day-row{display:flex;height:22px}
+.week-cell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;border-left:1px solid #f0f0f0}
+.week-cell.mon-start{border-left:1px solid #ccc;color:#666;font-weight:600}
+
+.cust-row{display:flex}
+.cust-label{flex:0 0 100px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#37474f;background:#fafafa;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10;border-bottom:1px solid #eee}
+.cust-gantt{position:relative;border-bottom:1px solid #eee}
+.cust-sep{display:flex;height:6px}
+.cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
+.cust-sep-right{flex:1;background:#f0f0f0}
+
+.day-bg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
+.day-bg.bg-we{background:rgba(0,0,0,.05)}
+.day-mark{position:absolute;top:0;bottom:0;width:0;pointer-events:none;z-index:0}
+.day-mark.dm-br{border-left:2px dashed rgba(126,87,194,.55)}
+.day-mark.dm-us{border-left:2px dashed rgba(230,140,0,.6)}
+.gridline{position:absolute;top:0;bottom:0;width:1px;z-index:0;pointer-events:none}
+.gridline.gl-month{background:rgba(0,0,0,.1)}
+.gridline.gl-week{background:rgba(0,0,0,.04)}
+.wc-we{background:rgba(0,0,0,.06)}
+.wc-br{background:rgba(126,87,194,.12)}
+.wc-us{background:rgba(230,140,0,.12)}
+
+.bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.bar:hover{filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
+.bar .bt{overflow:hidden;text-overflow:ellipsis}
+
+.tooltip{position:fixed;max-width:360px;padding:10px 14px;background:#263238;color:#eceff1;border-radius:6px;font-size:12px;line-height:1.5;pointer-events:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none}
+.tooltip .tl{font-weight:700;font-size:13px;margin-bottom:2px}
+.tooltip .tc{font-size:11px;color:#90a4ae;text-transform:uppercase;letter-spacing:.4px}
+.tooltip .td{margin-top:6px;font-size:11px;color:#80cbc4}
+.tooltip .tp{margin-top:6px;color:#b0bec5;font-size:11px;white-space:pre-line}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Staging Beta Testing Timeline — Cycle View by Customer</h1>
+  <p>E2E Beta Testing scenarios &middot; Staging environment &middot; Billing cycles per scenario</p>
+</div>
+
+<div class="controls">
+  <span class="legend-title">Categories</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#2e7d32 50%,#81c784 50%)"></span>REV</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#546e7a 50%,#b0bec5 50%)"></span>LAT</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#e6a100 50%,#ffe082 50%)"></span>2LAT</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#1565c0 50%,#90caf9 50%)"></span>RVSL</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#b71c1c 50%,#ef9a9a 50%)"></span>OTH</span>
+  <span class="sep"></span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:#455a64"></span>Billing (open&rarr;close)</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:#b0bec5"></span>Grace (close&rarr;due)</span>
+  <span class="sep"></span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.07)"></span>Weekend</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(126,87,194,.6)"></span>BR Holiday</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(230,140,0,.65)"></span>US Holiday</span>
+</div>
+
+<div class="controls" id="filterRow">
+  <span class="legend-title">Scenario</span>
+  <button class="filter-btn active" data-cat="all">All</button>
+  <button class="filter-btn" data-cat="rev">REV</button>
+  <button class="filter-btn" data-cat="lat">LAT</button>
+  <button class="filter-btn" data-cat="2lat">2LAT</button>
+  <button class="filter-btn" data-cat="rvsl">RVSL</button>
+  <button class="filter-btn" data-cat="oth">OTH</button>
+  <span class="sep"></span>
+  <span class="legend-title">Customer</span>
+  <button class="filter-btn active" data-cust="all">All</button>
+  <button class="filter-btn" data-cust="1">1</button>
+  <button class="filter-btn" data-cust="2">2</button>
+  <button class="filter-btn" data-cust="3">3</button>
+  <button class="filter-btn" data-cust="4">4</button>
+  <button class="filter-btn" data-cust="5">5</button>
+  <button class="filter-btn" data-cust="6">6</button>
+  <button class="filter-btn" data-cust="7">7</button>
+  <button class="filter-btn" data-cust="8">8</button>
+  <button class="filter-btn" data-cust="9">9</button>
+</div>
+
+<div class="scroll-container" id="sc"></div>
+<div class="tooltip" id="tt"></div>
+
+<script>
+var CLR = {
+  rev:  ["#2e7d32","#81c784","#fff"],
+  lat:  ["#546e7a","#b0bec5","#fff"],
+  "2lat":["#e6a100","#ffe082","#333"],
+  rvsl: ["#1565c0","#90caf9","#fff"],
+  oth:  ["#b71c1c","#ef9a9a","#fff"]
+};
+
+var S = [
+  {l:"REV 01",c:"rev",u:1,t:"FT 1.0",d:"Revolver \u2192 Keeps revolving",cy:[["2026-05-04","2026-05-05","2026-05-06"],["2026-05-06","2026-05-07","2026-05-08"],["2026-05-08","2026-05-09","2026-05-10"]]},
+  {l:"REV 02",c:"rev",u:6,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving",cy:[["2026-05-13","2026-05-16","2026-05-19"],["2026-05-17","2026-05-20","2026-05-23"]]},
+  {l:"REV 03",c:"rev",u:5,t:"FT 1.0",d:"Revolver (partial) \u2192 Leaves revolving",cy:[["2026-05-13","2026-05-14","2026-05-15"],["2026-05-15","2026-05-16","2026-05-17"]]},
+  {l:"REV 04",c:"rev",u:2,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (partial)",cy:[["2026-05-09","2026-05-10","2026-05-11"],["2026-05-11","2026-05-12","2026-05-13"]]},
+  {l:"REV 05",c:"rev",u:4,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-09","2026-05-10","2026-05-11"],["2026-05-11","2026-05-12","2026-05-13"]]},
+  {l:"REV 06",c:"rev",u:7,t:"FT 2.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-13","2026-05-16","2026-05-19"],["2026-05-17","2026-05-20","2026-05-23"]]},
+  {l:"REV 07",c:"rev",u:3,t:"FT 1.0",d:"Revolver \u2192 Leaves revolving \u2192 Revolver",cy:[["2026-05-09","2026-05-10","2026-05-11"],["2026-05-11","2026-05-12","2026-05-13"],["2026-05-13","2026-05-14","2026-05-15"]]},
+  {l:"LAT 08",c:"lat",u:2,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-05-13","2026-05-14","2026-05-15"],["2026-05-15","2026-05-16","2026-05-17"]]},
+  {l:"LAT 09",c:"lat",u:3,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-05-15","2026-05-16","2026-05-17"],["2026-05-17","2026-05-18","2026-05-19"]]},
+  {l:"LAT 10",c:"lat",u:5,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-05-17","2026-05-18","2026-05-19"],["2026-05-19","2026-05-20","2026-05-21"],["2026-05-21","2026-05-22","2026-05-23"]]},
+  {l:"LAT 11",c:"lat",u:1,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-05-10","2026-05-11","2026-05-12"],["2026-05-12","2026-05-13","2026-05-14"]]},
+  {l:"LAT 12",c:"lat",u:4,t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-05-13","2026-05-14","2026-05-15"],["2026-05-15","2026-05-16","2026-05-17"]]},
+  {l:"LAT 13",c:"lat",u:8,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-05-25","2026-05-28","2026-05-31"],["2026-05-29","2026-06-01","2026-06-04"]]},
+  {l:"LAT 14",c:"lat",u:7,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-05-21","2026-05-24","2026-05-27"],["2026-05-25","2026-05-28","2026-05-31"]]},
+  {l:"LAT 15",c:"lat",u:9,t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-05-25","2026-05-28","2026-05-31"],["2026-05-29","2026-06-01","2026-06-04"]]},
+  {l:"LAT 16",c:"lat",u:9,t:"FT 2.0",d:"Late & Revolver \u2192 Late Fee Waived \u2192 Leaves late",cy:[["2026-06-02","2026-06-05","2026-06-08"],["2026-06-06","2026-06-09","2026-06-12"]]},
+  {l:"2LAT 17",c:"2lat",u:5,t:"FT 1.0",d:"Late \u2192 Keeps late & revolving \u2192 Current",cy:[["2026-05-23","2026-05-24","2026-05-25"],["2026-05-25","2026-05-26","2026-05-27"]]},
+  {l:"2LAT 18",c:"2lat",u:6,t:"FT 2.0",d:"Late \u2192 Keeps late & revolving",cy:[["2026-05-21","2026-05-24","2026-05-27"],["2026-05-25","2026-05-28","2026-05-31"]]},
+  {l:"2LAT 19",c:"2lat",u:1,t:"FT 1.0",d:"Late \u2192 Keeps late & revolving",cy:[["2026-05-14","2026-05-15","2026-05-16"],["2026-05-16","2026-05-17","2026-05-18"]]},
+  {l:"2LAT 20",c:"2lat",u:2,t:"FT 1.0",d:"Late \u2192 Late Fee Waived \u2192 Keeps late",cy:[["2026-05-17","2026-05-18","2026-05-19"],["2026-05-19","2026-05-20","2026-05-21"]]},
+  {l:"RVSL 21",c:"rvsl",u:3,t:"FT 1.0",d:"Reversal same cycle - not revolver",cy:[["2026-05-19","2026-05-20","2026-05-21"],["2026-05-21","2026-05-22","2026-05-23"]]},
+  {l:"RVSL 22",c:"rvsl",u:4,t:"FT 1.0",d:"Reversal same cycle - single purchase",cy:[["2026-05-17","2026-05-18","2026-05-19"],["2026-05-19","2026-05-20","2026-05-21"]]},
+  {l:"RVSL 23",c:"rvsl",u:8,t:"FT 2.0",d:"Reversal same cycle - bill < $25",cy:[["2026-06-02","2026-06-05","2026-06-08"],["2026-06-06","2026-06-09","2026-06-12"]]},
+  {l:"RVSL 24",c:"rvsl",u:1,t:"FT 1.0",d:"Reversal different cycle - prepaid balance",cy:[["2026-05-18","2026-05-19","2026-05-20"],["2026-05-20","2026-05-21","2026-05-22"]]},
+  {l:"RVSL 25",c:"rvsl",u:3,t:"FT 1.0",d:"Reversal same cycle - revolver",cy:[["2026-05-23","2026-05-24","2026-05-25"],["2026-05-25","2026-05-26","2026-05-27"]]},
+  {l:"RVSL 26",c:"rvsl",u:4,t:"FT 1.0",d:"Reversal different cycle - late",cy:[["2026-05-21","2026-05-22","2026-05-23"],["2026-05-23","2026-05-24","2026-05-25"]]},
+  {l:"RVSL 27",c:"rvsl",u:5,t:"FT 1.0",d:"Reversal different cycle - reversal > outstanding",cy:[["2026-05-27","2026-05-28","2026-05-29"],["2026-05-29","2026-05-30","2026-05-31"]]},
+  {l:"RVSL 28",c:"rvsl",u:2,t:"FT 1.0",d:"Partial reversals",cy:[["2026-05-21","2026-05-22","2026-05-23"],["2026-05-23","2026-05-24","2026-05-25"]]},
+  {l:"RVSL 29",c:"rvsl",u:4,t:"FT 1.0",d:"Partial reversals - interest reversal",cy:[["2026-05-25","2026-05-26","2026-05-27"],["2026-05-27","2026-05-28","2026-05-29"]]},
+  {l:"OTH 30",c:"oth",u:2,t:"FT 1.0",d:"Usage of prepaid balance for new purchases",cy:[["2026-05-25","2026-05-26","2026-05-27"],["2026-05-27","2026-05-28","2026-05-29"]]},
+  {l:"OTH 31",c:"oth",u:1,t:"FT 1.0",d:"Overlimit balance",cy:[["2026-05-22","2026-05-23","2026-05-24"],["2026-05-24","2026-05-25","2026-05-26"]]},
+  {l:"OTH 32",c:"oth",u:3,t:"FT 1.0",d:"Manual adjustment",cy:[["2026-05-27","2026-05-28","2026-05-29"],["2026-05-29","2026-05-30","2026-05-31"]]}
+];
+
+var T0 = new Date(2026, 4, 4);
+var T1 = new Date(2026, 5, 12);
+var filt = "all";
+var custFilt = "all";
+var PPD = 16, BH = 28, CW = 100;
+var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var DN = ["S","M","T","W","T","F","S"];
+var CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
+
+var HOL_BR = {"2026-06-04":"Corpus Christi"};
+var HOL_US = {"2026-05-25":"Memorial Day"};
+
+function pad2(n){return n<10?"0"+n:String(n)}
+function dayKey(d){return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
+function dayType(d){
+  var k=dayKey(d);
+  if(HOL_BR[k])return "br";
+  if(HOL_US[k])return "us";
+  var dow=d.getDay();if(dow===0||dow===6)return "we";
+  return null;
+}
+function dayLabel(d){var k=dayKey(d);return HOL_BR[k]||HOL_US[k]||null}
+function dBetween(a,b){return Math.round((b-a)/864e5)}
+function pD(s){var p=s.split("-");return new Date(+p[0],p[1]-1,+p[2])}
+function fmt(d){return MN[d.getMonth()]+" "+d.getDate()}
+function nDays(){return dBetween(T0,T1)+1}
+function tW(){return nDays()*PPD}
+
+function computeRange(){
+  var mn=Infinity,mx=-Infinity;
+  for(var i=0;i<S.length;i++){for(var j=0;j<S[i].cy.length;j++){
+    var ta=pD(S[i].cy[j][0]).getTime(),tb=pD(S[i].cy[j][2]).getTime();
+    if(ta<mn)mn=ta;if(tb>mx)mx=tb;
+  }}
+  if(mn!==Infinity){T0=new Date(mn);T1=new Date(mx)}
+}
+
+function group(){
+  var g={};for(var i=0;i<S.length;i++){var s=S[i];
+    if(filt!=="all"&&s.c!==filt)continue;
+    if(custFilt!=="all"&&s.u!==+custFilt)continue;
+    (g[s.u]||(g[s.u]=[])).push(s);
+  }
+  for(var k in g)g[k].sort(function(a,b){return pD(a.cy[0][0])-pD(b.cy[0][0])});return g;
+}
+
+function render(){
+  var sc=document.getElementById("sc"),g=group(),w=tW();
+  var custs=Object.keys(g).map(Number).sort(function(a,b){return a-b});
+  if(!custs.length){sc.innerHTML='<div style="padding:40px;text-align:center;color:#90a4ae">No scenarios to display.</div>';return}
+  var html='<div class="chart-inner" style="width:'+(CW+w)+'px">';
+  html+='<div class="header-band"><div class="corner">Customer</div><div class="date-cols" style="width:'+w+'px">';
+  html+='<div class="month-row">';
+  var spans=[],cur=new Date(T0),pm=-1,ms=0;
+  while(cur<=T1){var mo=cur.getMonth();if(mo!==pm){if(pm!==-1)spans.push({m:pm,s:ms,e:dBetween(T0,cur)});ms=dBetween(T0,cur);pm=mo}cur.setDate(cur.getDate()+1)}
+  spans.push({m:pm,s:ms,e:nDays()});
+  for(var si=0;si<spans.length;si++)html+='<div class="month-cell" style="width:'+((spans[si].e-spans[si].s)*PPD)+'px">'+MN[spans[si].m]+' '+T0.getFullYear()+'</div>';
+  html+='</div><div class="wday-row">';
+  cur=new Date(T0);while(cur<=T1){var dt0=dayType(cur),wdcls="wday-cell";if(dt0)wdcls+=" wc-"+dt0;
+  html+='<div class="'+wdcls+'" style="width:'+PPD+'px">'+DN[cur.getDay()]+'</div>';cur.setDate(cur.getDate()+1)}
+  html+='</div><div class="day-row">';
+  cur=new Date(T0);while(cur<=T1){var isMS=cur.getDate()===1,isMon=cur.getDay()===1;
+  var dt=dayType(cur),dcls=isMS?"week-cell mon-start":"week-cell";if(dt)dcls+=" wc-"+dt;
+  var dtip=dayLabel(cur);var dtipAttr=dtip?' title="'+dtip+'"':'';
+  html+='<div class="'+dcls+'"'+dtipAttr+' style="width:'+PPD+'px">'+cur.getDate()+'</div>';cur.setDate(cur.getDate()+1)}
+  html+='</div></div></div>';
+
+  for(var ci=0;ci<custs.length;ci++){
+    var cid=custs[ci],list=g[cid],rows=0;
+    for(var si2=0;si2<list.length;si2++)rows+=list[si2].cy.length;
+    var h=rows*BH;
+    html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+cid+'</div>';
+    html+='<div class="cust-gantt" style="width:'+w+'px;height:'+h+'px">';
+    cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);var dty=dayType(cur);
+    if(dty==="we")html+='<div class="day-bg bg-we" style="left:'+(dd*PPD)+'px;width:'+PPD+'px"></div>';
+    else if(dty)html+='<div class="day-mark dm-'+dty+'" style="left:'+(dd*PPD+Math.floor(PPD/2))+'px"></div>';
+    if(cur.getDate()===1)html+='<div class="gridline gl-month" style="left:'+(dd*PPD)+'px"></div>';
+    else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
+    cur.setDate(cur.getDate()+1)}
+
+    var ri=0,cyN=0;
+    for(var si3=0;si3<list.length;si3++){var s=list[si3];
+      for(var j=0;j<s.cy.length;j++){
+        cyN++;
+        var sd=pD(s.cy[j][0]),cd=pD(s.cy[j][1]),ed=pD(s.cy[j][2]);
+        var gs=new Date(cd);gs.setDate(gs.getDate()+1);
+        var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
+        var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+3;
+        var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
+        var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
+        var col=CLR[s.c]||CLR.lat;
+        var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
+        var txt=s.l+" \u2022 Cycle "+cyN+" \u2022 "+fmt(sd)+" \u2013 "+fmt(ed);
+        html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
+          +' data-l="'+s.l+'" data-c="'+s.c+'" data-t="'+s.t+'" data-d="'+s.d.replace(/"/g,'&quot;')+'"'
+          +' data-n="'+cyN+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-u="'+s.u+'">'
+          +'<span class="bt">'+txt+'</span></div>';
+        ri++;
+    }}
+    html+='</div></div>';
+    if(ci<custs.length-1)html+='<div class="cust-sep"><div class="cust-sep-left"></div><div class="cust-sep-right" style="width:'+w+'px"></div></div>';
+  }
+  html+='</div>';sc.innerHTML=html;
+}
+
+var tt=document.getElementById("tt");
+document.addEventListener("pointerover",function(e){
+  var b=e.target.closest(".bar");if(!b){tt.style.display="none";return}var d=b.dataset;
+  tt.innerHTML='<div class="tl">'+d.l+' \u2014 Cycle '+d.n+' (C'+d.j+')</div>'
+    +'<div class="tc">'+CN[d.c]+' \u00b7 '+d.t+' \u00b7 Customer '+d.u+'</div>'
+    +'<div class="td">Billing: '+d.s+' \u2013 '+d.m+' &nbsp;\u00b7&nbsp; Grace: '+d.gs+' \u2013 '+d.e+'</div>'
+    +'<div class="tp">'+d.d.replace(/</g,"&lt;")+'</div>';
+  tt.style.display="block"
+});
+document.addEventListener("pointermove",function(e){
+  if(tt.style.display!=="block")return;var x=e.clientX+14,y=e.clientY+14;
+  if(x+tt.offsetWidth>innerWidth-10)x=e.clientX-tt.offsetWidth-10;
+  if(y+tt.offsetHeight>innerHeight-10)y=e.clientY-tt.offsetHeight-10;
+  tt.style.left=x+"px";tt.style.top=y+"px"
+});
+document.addEventListener("pointerout",function(e){
+  if(e.target.closest(".bar")&&!e.relatedTarget?.closest(".bar"))tt.style.display="none"
+});
+
+document.querySelectorAll("[data-cat]").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll("[data-cat]").forEach(function(b){b.classList.remove("active")});
+    btn.classList.add("active");filt=btn.dataset.cat;render()
+  })
+});
+document.querySelectorAll("[data-cust]").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll("[data-cust]").forEach(function(b){b.classList.remove("active")});
+    btn.classList.add("active");custFilt=btn.dataset.cust;render()
+  })
+});
+
+computeRange();render();
+</script>
+</body>
+</html>
