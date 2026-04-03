@@ -42,7 +42,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .month-row{display:flex;height:24px;border-bottom:1px solid #f0f0f0}
 .month-cell{display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#37474f;border-left:1px solid #e0e0e0;text-transform:uppercase;letter-spacing:.5px}
 .month-cell:first-child{border-left:none}
-.day-row{display:flex;height:28px}
+.wday-row{display:flex;height:16px;border-bottom:1px solid #f0f0f0}
+.wday-cell{display:flex;align-items:center;justify-content:center;font-size:9px;color:#b0b0b0;letter-spacing:.3px;text-transform:uppercase}
+.day-row{display:flex;height:22px}
 .week-cell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;border-left:1px solid #f0f0f0}
 .week-cell.mon-start{border-left:1px solid #ccc;color:#666;font-weight:600}
 
@@ -53,16 +55,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
 .cust-sep-right{flex:1;background:#f0f0f0}
 
+.day-bg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
+.day-bg.bg-we{background:rgba(0,0,0,.05)}
 .day-mark{position:absolute;top:0;bottom:0;width:0;pointer-events:none;z-index:0}
-.day-mark.dm-we{border-left:1px dashed rgba(0,0,0,.22)}
 .day-mark.dm-br{border-left:2px dashed rgba(126,87,194,.55)}
 .day-mark.dm-us{border-left:2px dashed rgba(230,140,0,.6)}
 .gridline{position:absolute;top:0;bottom:0;width:1px;z-index:0;pointer-events:none}
 .gridline.gl-month{background:rgba(0,0,0,.1)}
 .gridline.gl-week{background:rgba(0,0,0,.04)}
-.wc-we{background:rgba(0,0,0,.04)}
-.wc-br{background:rgba(126,87,194,.1)}
-.wc-us{background:rgba(230,140,0,.1)}
+.wc-we{background:rgba(0,0,0,.06)}
+.wc-br{background:rgba(126,87,194,.12)}
+.wc-us{background:rgba(230,140,0,.12)}
 
 .bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .bar:hover{filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
@@ -100,7 +103,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <span class="phase-legend"><span class="phase-swatch" style="background:#455a64"></span>Billing (open&rarr;close)</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:#b0bec5"></span>Grace (close&rarr;due)</span>
   <span class="sep"></span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(0,0,0,.25)"></span>Weekend</span>
+  <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.07)"></span>Weekend</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(126,87,194,.6)"></span>BR Holiday</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(230,140,0,.65)"></span>US Holiday</span>
   <span class="sep"></span>
@@ -178,6 +181,7 @@ var nextRefreshAt = 0;
 var countdownTimer = null;
 var PPD = 16, BH = 28, CW = 100;
 var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var DN = ["Su","Mo","Tu","We","Th","Fr","Sa"];
 var CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
 
 var HOL_BR = {"2026-06-04":"Corpus Christi"};
@@ -309,11 +313,14 @@ function render(){
   while(cur<=T1){var mo=cur.getMonth();if(mo!==pm){if(pm!==-1)spans.push({m:pm,s:ms,e:dBetween(T0,cur)});ms=dBetween(T0,cur);pm=mo}cur.setDate(cur.getDate()+1)}
   spans.push({m:pm,s:ms,e:nDays()});
   for(var si=0;si<spans.length;si++)html+='<div class="month-cell" style="width:'+((spans[si].e-spans[si].s)*PPD)+'px">'+MN[spans[si].m]+' '+T0.getFullYear()+'</div>';
+  html+='</div><div class="wday-row">';
+  cur=new Date(T0);while(cur<=T1){var dt0=dayType(cur),wdcls="wday-cell";if(dt0)wdcls+=" wc-"+dt0;
+  html+='<div class="'+wdcls+'" style="width:'+PPD+'px">'+DN[cur.getDay()]+'</div>';cur.setDate(cur.getDate()+1)}
   html+='</div><div class="day-row">';
   cur=new Date(T0);while(cur<=T1){var isMS=cur.getDate()===1,isMon=cur.getDay()===1;
   var dt=dayType(cur),dcls=isMS?"week-cell mon-start":"week-cell";if(dt)dcls+=" wc-"+dt;
   var dtip=dayLabel(cur);var dtipAttr=dtip?' title="'+dtip+'"':'';
-  html+='<div class="'+dcls+'"'+dtipAttr+' style="width:'+PPD+'px">'+((isMon||isMS)?cur.getDate():"")+'</div>';cur.setDate(cur.getDate()+1)}
+  html+='<div class="'+dcls+'"'+dtipAttr+' style="width:'+PPD+'px">'+cur.getDate()+'</div>';cur.setDate(cur.getDate()+1)}
   html+='</div></div></div>';
 
   for(var ci=0;ci<custs.length;ci++){
@@ -323,7 +330,8 @@ function render(){
     html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+cid+'</div>';
     html+='<div class="cust-gantt" style="width:'+w+'px;height:'+h+'px">';
     cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);var dty=dayType(cur);
-    if(dty)html+='<div class="day-mark dm-'+dty+'" style="left:'+(dd*PPD+Math.floor(PPD/2))+'px"></div>';
+    if(dty==="we")html+='<div class="day-bg bg-we" style="left:'+(dd*PPD)+'px;width:'+PPD+'px"></div>';
+    else if(dty)html+='<div class="day-mark dm-'+dty+'" style="left:'+(dd*PPD+Math.floor(PPD/2))+'px"></div>';
     if(cur.getDate()===1)html+='<div class="gridline gl-month" style="left:'+(dd*PPD)+'px"></div>';
     else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
     cur.setDate(cur.getDate()+1)}
