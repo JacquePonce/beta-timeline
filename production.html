@@ -8,11 +8,10 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f8f9fa;color:#333;font-size:13px;line-height:1.4}
 
-.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 24px;background:#6a1b9a;color:#f3e5f5;font-size:12px}
+.nav-bar{display:flex;align-items:center;gap:10px;padding:6px 24px;background:#6a1b9a;color:#f3e5f5;font-size:12px}
 .nav-bar a{color:#fff;text-decoration:none;padding:5px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.35);transition:all .15s;font-weight:500}
 .nav-bar a:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.6)}
-.nav-links{display:flex;gap:10px;align-items:center}
-.nav-sep{color:rgba(255,255,255,.4)}
+.nav-env{color:rgba(255,255,255,.7);margin-left:4px}
 .top-bar{padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e0e0e0}
 .top-bar h1{font-size:20px;font-weight:600;color:#1a1a1a}
 .top-bar p{font-size:13px;color:#666;margin-top:4px}
@@ -75,11 +74,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
 <div class="nav-bar">
   <a href="index.html">Home</a>
-  <div class="nav-links">
-    <span style="color:rgba(255,255,255,.7)">PROD</span>
-    <span class="nav-sep">&middot;</span>
-    <a href="staging.html">Staging</a>
-  </div>
+  <a href="staging.html">Staging</a>
+  <span class="nav-env">PROD</span>
 </div>
 
 <div class="top-bar">
