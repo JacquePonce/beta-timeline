@@ -276,7 +276,7 @@ function render(){
   for(var fi=0;fi<filtered.length;fi++){
     var p=filtered[fi],stg=p.stg,prd=p.prd;
     var stgN=stg?stg.cy.length:0,prdN=prd?prd.cy.length:0;
-    var rows=stgN+prdN,h=rows*BH;
+    var rows=Math.max(stgN,prdN),h=rows*BH;
     var lbl=(stg||prd).l,cat=(stg||prd).c;
 
     html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+lbl+'</div>';
@@ -289,41 +289,38 @@ function render(){
     else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
     cur.setDate(cur.getDate()+1)}
 
-    if(stgN>0&&prdN>0)html+='<div class="env-divider" style="top:'+(stgN*BH)+'px"></div>';
-
-    var ri=0;
-    if(stg){for(var j=0;j<stg.cy.length;j++){
-      var sd=pD(stg.cy[j][0]),cd=pD(stg.cy[j][1]),ed=pD(stg.cy[j][2]);
-      var gs=new Date(cd);gs.setDate(gs.getDate()+1);
-      var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
-      var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+2;
-      var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
-      var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
-      var col=CLR[cat]||CLR.lat;
-      var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
-      var txt="S:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
-      html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
-        +' data-l="'+stg.l+'" data-c="'+cat+'" data-t="'+stg.t+'" data-d="'+stg.d.replace(/"/g,'&quot;')+'"'
-        +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="STG">'
-        +'<span class="bt">'+txt+'</span></div>';
-      ri++;
-    }}
-    if(prd){for(var j=0;j<prd.cy.length;j++){
-      var sd=pD(prd.cy[j][0]),cd=pD(prd.cy[j][1]),ed=pD(prd.cy[j][2]);
-      var gs=new Date(cd);gs.setDate(gs.getDate()+1);
-      var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
-      var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+2;
-      var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
-      var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
-      var col=CLR[cat]||CLR.lat;
-      var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
-      var txt="P:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
-      html+='<div class="bar bar-prd" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
-        +' data-l="'+prd.l+'" data-c="'+cat+'" data-t="'+prd.t+'" data-d="'+prd.d.replace(/"/g,'&quot;')+'"'
-        +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="PROD">'
-        +'<span class="bt">'+txt+'</span></div>';
-      ri++;
-    }}
+    for(var j=0;j<rows;j++){
+      if(stg&&j<stgN){
+        var sd=pD(stg.cy[j][0]),cd=pD(stg.cy[j][1]),ed=pD(stg.cy[j][2]);
+        var gs=new Date(cd);gs.setDate(gs.getDate()+1);
+        var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
+        var left=off*PPD,bw=Math.max(span*PPD-4,20),top=j*BH+2;
+        var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
+        var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
+        var col=CLR[cat]||CLR.lat;
+        var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
+        var txt="S:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
+        html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
+          +' data-l="'+stg.l+'" data-c="'+cat+'" data-t="'+stg.t+'" data-d="'+stg.d.replace(/"/g,'&quot;')+'"'
+          +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="STG">'
+          +'<span class="bt">'+txt+'</span></div>';
+      }
+      if(prd&&j<prdN){
+        var sd=pD(prd.cy[j][0]),cd=pD(prd.cy[j][1]),ed=pD(prd.cy[j][2]);
+        var gs=new Date(cd);gs.setDate(gs.getDate()+1);
+        var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
+        var left=off*PPD,bw=Math.max(span*PPD-4,20),top=j*BH+2;
+        var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
+        var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
+        var col=CLR[cat]||CLR.lat;
+        var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
+        var txt="P:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
+        html+='<div class="bar bar-prd" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
+          +' data-l="'+prd.l+'" data-c="'+cat+'" data-t="'+prd.t+'" data-d="'+prd.d.replace(/"/g,'&quot;')+'"'
+          +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="PROD">'
+          +'<span class="bt">'+txt+'</span></div>';
+      }
+    }
     html+='</div></div>';
     if(fi<filtered.length-1)html+='<div class="cust-sep"><div class="cust-sep-left"></div><div class="cust-sep-right" style="width:'+w+'px"></div></div>';
   }
