@@ -25,17 +25,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .filter-btn.active{background:#37474f;color:#fff;border-color:#37474f}
 .phase-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#888}
 .phase-swatch{width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.15)}
+.env-swatch{width:28px;height:14px;border-radius:3px;flex-shrink:0}
 
-.env-header{padding:12px 24px 8px;background:#f5f5f5;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:12px}
-.env-badge{display:inline-block;padding:3px 12px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.env-badge.stg{background:#e8f5e9;color:#2e7d32}
-.env-badge.prd{background:#e3f2fd;color:#1565c0}
-.env-title{font-size:14px;font-weight:600;color:#37474f}
-.env-dates{font-size:12px;color:#90a4ae;margin-left:auto}
-
-.scroll-container{overflow:auto;background:#fff;position:relative}
-.sc-stg{max-height:45vh;border-bottom:2px solid #e0e0e0}
-.sc-prd{max-height:45vh}
+.scroll-container{overflow:auto;max-height:calc(100vh - 200px);background:#fff;position:relative}
 .chart-inner{position:relative}
 .header-band{position:sticky;top:0;z-index:15;display:flex;background:#fff;border-bottom:1px solid #d0d0d0}
 .corner{flex:0 0 100px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#78909c;text-transform:uppercase;letter-spacing:.5px;background:#fafafa;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:20}
@@ -56,6 +48,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .cust-sep-left{flex:0 0 100px;background:#f0f0f0;border-right:1px solid #e0e0e0;position:sticky;left:0;z-index:10}
 .cust-sep-right{flex:1;background:#f0f0f0}
 
+.env-divider{position:absolute;left:0;right:0;height:0;border-top:1px dashed #ccc;z-index:1;pointer-events:none}
+
 .day-bg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
 .day-bg.bg-we{background:rgba(0,0,0,.05)}
 .day-mark{position:absolute;top:0;bottom:0;width:0;pointer-events:none;z-index:0}
@@ -68,9 +62,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .wc-br{background:rgba(126,87,194,.12)}
 .wc-us{background:rgba(230,140,0,.12)}
 
-.bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.bar{position:absolute;height:20px;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;transition:filter .12s,box-shadow .12s;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .bar:hover{filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
 .bar .bt{overflow:hidden;text-overflow:ellipsis}
+.bar.bar-prd{border:2px solid rgba(255,255,255,.5)}
 
 .tooltip{position:fixed;max-width:360px;padding:10px 14px;background:#263238;color:#eceff1;border-radius:6px;font-size:12px;line-height:1.5;pointer-events:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none}
 .tooltip .tl{font-weight:700;font-size:13px;margin-bottom:2px}
@@ -90,7 +85,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
 <div class="top-bar">
   <h1>Beta Testing Timeline — Combined View</h1>
-  <p>E2E Beta Testing scenarios &middot; Staging + Production environments &middot; Billing cycles per scenario</p>
+  <p>STG &amp; PROD cycles per scenario on a unified timeline &middot; See when production starts after staging</p>
 </div>
 
 <div class="controls">
@@ -101,8 +96,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#1565c0 50%,#90caf9 50%)"></span>RVSL</span>
   <span class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to right,#b71c1c 50%,#ef9a9a 50%)"></span>OTH</span>
   <span class="sep"></span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:#455a64"></span>Billing (open&rarr;close)</span>
-  <span class="phase-legend"><span class="phase-swatch" style="background:#b0bec5"></span>Grace (close&rarr;due)</span>
+  <span class="legend-title">Environment</span>
+  <span class="legend-item"><span class="env-swatch" style="background:#546e7a"></span>STG</span>
+  <span class="legend-item"><span class="env-swatch" style="background:#546e7a;border:2px solid rgba(255,255,255,.7);outline:1px solid #999"></span>PROD</span>
   <span class="sep"></span>
   <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.07)"></span>Weekend</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(126,87,194,.6)"></span>BR Holiday</span>
@@ -119,20 +115,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <button class="filter-btn" data-cat="oth">OTH</button>
 </div>
 
-<div class="env-header">
-  <span class="env-badge stg">STG</span>
-  <span class="env-title">Staging Environment</span>
-  <span class="env-dates" id="stg-range"></span>
-</div>
-<div class="scroll-container sc-stg" id="sc-stg"></div>
-
-<div class="env-header">
-  <span class="env-badge prd">PROD</span>
-  <span class="env-title">Production Environment</span>
-  <span class="env-dates" id="prd-range"></span>
-</div>
-<div class="scroll-container sc-prd" id="sc-prd"></div>
-
+<div class="scroll-container" id="sc"></div>
 <div class="tooltip" id="tt"></div>
 
 <script>
@@ -218,10 +201,11 @@ var HOL_BR = {"2026-04-21":"Tiradentes","2026-05-01":"Labor Day","2026-06-04":"C
 var HOL_US = {"2026-05-25":"Memorial Day","2026-06-19":"Juneteenth","2026-07-03":"Independence Day (obs)"};
 
 var filt = "all";
-var PPD = 16, BH = 28, CW = 100;
+var PPD = 14, BH = 24, CW = 100;
 var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var DN = ["S","M","T","W","T","F","S"];
 var CN = {rev:"Revolving","2lat":"2nd Late",lat:"Lateness",rvsl:"Reversal",oth:"Others"};
+var T0,T1;
 
 function pad2(n){return n<10?"0"+n:String(n)}
 function dayKey(d){return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
@@ -236,40 +220,48 @@ function dayLabel(d){var k=dayKey(d);return HOL_BR[k]||HOL_US[k]||null}
 function dBetween(a,b){return Math.round((b-a)/864e5)}
 function pD(s){var p=s.split("-");return new Date(+p[0],p[1]-1,+p[2])}
 function fmt(d){return MN[d.getMonth()]+" "+d.getDate()}
+function nDays(){return dBetween(T0,T1)+1}
+function tW(){return nDays()*PPD}
 
-function computeRange(data){
+function computeRange(){
   var mn=Infinity,mx=-Infinity;
-  for(var i=0;i<data.length;i++){for(var j=0;j<data[i].cy.length;j++){
-    var ta=pD(data[i].cy[j][0]).getTime(),tb=pD(data[i].cy[j][2]).getTime();
+  var all=S_STG.concat(S_PRD);
+  for(var i=0;i<all.length;i++){for(var j=0;j<all[i].cy.length;j++){
+    var ta=pD(all[i].cy[j][0]).getTime(),tb=pD(all[i].cy[j][2]).getTime();
     if(ta<mn)mn=ta;if(tb>mx)mx=tb;
   }}
-  return {t0:new Date(mn),t1:new Date(mx)};
+  T0=new Date(mn);T1=new Date(mx);
 }
 
-function getList(data){
+function buildPairs(){
+  var map={};
+  for(var i=0;i<S_STG.length;i++){var s=S_STG[i];var k=s.l.replace(/\s+0/," ");map[k]={stg:s,prd:null}}
+  for(var i=0;i<S_PRD.length;i++){var s=S_PRD[i];var k=s.l.replace(/\s+0/," ");if(map[k])map[k].prd=s;else map[k]={stg:null,prd:s}}
+  var order=[];
+  for(var i=0;i<S_STG.length;i++){var k=S_STG[i].l.replace(/\s+0/," ");if(order.indexOf(k)===-1)order.push(k)}
+  for(var i=0;i<S_PRD.length;i++){var k=S_PRD[i].l.replace(/\s+0/," ");if(order.indexOf(k)===-1)order.push(k)}
   var list=[];
-  for(var i=0;i<data.length;i++){
-    if(filt!=="all"&&data[i].c!==filt)continue;
-    list.push(data[i]);
-  }
+  for(var i=0;i<order.length;i++)list.push(map[order[i]]);
   return list;
 }
 
-function renderChart(scId,data,env){
-  var range=computeRange(data),T0=range.t0,T1=range.t1;
-  var nD=dBetween(T0,T1)+1,w=nD*PPD;
-  var sc=document.getElementById(scId),list=getList(data);
+function render(){
+  var sc=document.getElementById("sc"),w=tW();
+  var pairs=buildPairs();
+  var filtered=[];
+  for(var i=0;i<pairs.length;i++){
+    var p=pairs[i],cat=(p.stg||p.prd).c;
+    if(filt!=="all"&&cat!==filt)continue;
+    filtered.push(p);
+  }
+  if(!filtered.length){sc.innerHTML='<div style="padding:40px;text-align:center;color:#90a4ae">No scenarios to display.</div>';return}
 
-  var rangeEl=document.getElementById(scId.replace("sc-","")+ "-range");
-  if(rangeEl)rangeEl.textContent=fmt(T0)+" \u2013 "+fmt(T1)+", "+T0.getFullYear();
-
-  if(!list.length){sc.innerHTML='<div style="padding:40px;text-align:center;color:#90a4ae">No scenarios to display.</div>';return}
   var html='<div class="chart-inner" style="width:'+(CW+w)+'px">';
   html+='<div class="header-band"><div class="corner">Scenario</div><div class="date-cols" style="width:'+w+'px">';
   html+='<div class="month-row">';
   var spans=[],cur=new Date(T0),pm=-1,ms=0;
   while(cur<=T1){var mo=cur.getMonth();if(mo!==pm){if(pm!==-1)spans.push({m:pm,y:cur.getFullYear(),s:ms,e:dBetween(T0,cur)});ms=dBetween(T0,cur);pm=mo}cur.setDate(cur.getDate()+1)}
-  spans.push({m:pm,y:T1.getFullYear(),s:ms,e:nD});
+  spans.push({m:pm,y:T1.getFullYear(),s:ms,e:nDays()});
   for(var si=0;si<spans.length;si++)html+='<div class="month-cell" style="width:'+((spans[si].e-spans[si].s)*PPD)+'px">'+MN[spans[si].m]+' '+spans[si].y+'</div>';
   html+='</div><div class="wday-row">';
   cur=new Date(T0);while(cur<=T1){var dt0=dayType(cur),wdcls="wday-cell";if(dt0)wdcls+=" wc-"+dt0;
@@ -281,10 +273,15 @@ function renderChart(scId,data,env){
   html+='<div class="'+dcls+'"'+dtipAttr+' style="width:'+PPD+'px">'+cur.getDate()+'</div>';cur.setDate(cur.getDate()+1)}
   html+='</div></div></div>';
 
-  for(var si2=0;si2<list.length;si2++){
-    var s=list[si2],rows=s.cy.length,h=rows*BH;
-    html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+s.l+'</div>';
+  for(var fi=0;fi<filtered.length;fi++){
+    var p=filtered[fi],stg=p.stg,prd=p.prd;
+    var stgN=stg?stg.cy.length:0,prdN=prd?prd.cy.length:0;
+    var rows=stgN+prdN,h=rows*BH;
+    var lbl=(stg||prd).l,cat=(stg||prd).c;
+
+    html+='<div class="cust-row"><div class="cust-label" style="height:'+h+'px">'+lbl+'</div>';
     html+='<div class="cust-gantt" style="width:'+w+'px;height:'+h+'px">';
+
     cur=new Date(T0);while(cur<=T1){var dd=dBetween(T0,cur);var dty=dayType(cur);
     if(dty==="we")html+='<div class="day-bg bg-we" style="left:'+(dd*PPD)+'px;width:'+PPD+'px"></div>';
     else if(dty)html+='<div class="day-mark dm-'+dty+'" style="left:'+(dd*PPD+Math.floor(PPD/2))+'px"></div>';
@@ -292,36 +289,51 @@ function renderChart(scId,data,env){
     else if(cur.getDay()===1)html+='<div class="gridline gl-week" style="left:'+(dd*PPD)+'px"></div>';
     cur.setDate(cur.getDate()+1)}
 
-    for(var j=0;j<s.cy.length;j++){
-      var sd=pD(s.cy[j][0]),cd=pD(s.cy[j][1]),ed=pD(s.cy[j][2]);
+    if(stgN>0&&prdN>0)html+='<div class="env-divider" style="top:'+(stgN*BH)+'px"></div>';
+
+    var ri=0;
+    if(stg){for(var j=0;j<stg.cy.length;j++){
+      var sd=pD(stg.cy[j][0]),cd=pD(stg.cy[j][1]),ed=pD(stg.cy[j][2]);
       var gs=new Date(cd);gs.setDate(gs.getDate()+1);
       var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
-      var left=off*PPD,bw=Math.max(span*PPD-4,20),top=j*BH+3;
+      var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+2;
       var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
       var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
-      var col=CLR[s.c]||CLR.lat;
+      var col=CLR[cat]||CLR.lat;
       var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
-      var txt="C"+j+" \u2022 "+fmt(sd)+" \u2013 "+fmt(ed);
+      var txt="S:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
       html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
-        +' data-l="'+s.l+'" data-c="'+s.c+'" data-t="'+s.t+'" data-d="'+s.d.replace(/"/g,'&quot;')+'"'
-        +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="'+env+'">'
+        +' data-l="'+stg.l+'" data-c="'+cat+'" data-t="'+stg.t+'" data-d="'+stg.d.replace(/"/g,'&quot;')+'"'
+        +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="STG">'
         +'<span class="bt">'+txt+'</span></div>';
-    }
+      ri++;
+    }}
+    if(prd){for(var j=0;j<prd.cy.length;j++){
+      var sd=pD(prd.cy[j][0]),cd=pD(prd.cy[j][1]),ed=pD(prd.cy[j][2]);
+      var gs=new Date(cd);gs.setDate(gs.getDate()+1);
+      var off=dBetween(T0,sd),span=dBetween(sd,ed)+1;
+      var left=off*PPD,bw=Math.max(span*PPD-4,20),top=ri*BH+2;
+      var totalD=dBetween(sd,ed)+1,billD=dBetween(sd,cd)+1;
+      var pct=totalD>0?((billD/totalD)*100).toFixed(1):50;
+      var col=CLR[cat]||CLR.lat;
+      var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
+      var txt="P:C"+j+" \u2022 "+fmt(sd)+"\u2013"+fmt(ed);
+      html+='<div class="bar bar-prd" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
+        +' data-l="'+prd.l+'" data-c="'+cat+'" data-t="'+prd.t+'" data-d="'+prd.d.replace(/"/g,'&quot;')+'"'
+        +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'" data-env="PROD">'
+        +'<span class="bt">'+txt+'</span></div>';
+      ri++;
+    }}
     html+='</div></div>';
-    if(si2<list.length-1)html+='<div class="cust-sep"><div class="cust-sep-left"></div><div class="cust-sep-right" style="width:'+w+'px"></div></div>';
+    if(fi<filtered.length-1)html+='<div class="cust-sep"><div class="cust-sep-left"></div><div class="cust-sep-right" style="width:'+w+'px"></div></div>';
   }
   html+='</div>';sc.innerHTML=html;
-}
-
-function renderAll(){
-  renderChart("sc-stg",S_STG,"STG");
-  renderChart("sc-prd",S_PRD,"PROD");
 }
 
 var tt=document.getElementById("tt");
 document.addEventListener("pointerover",function(e){
   var b=e.target.closest(".bar");if(!b){tt.style.display="none";return}var d=b.dataset;
-  tt.innerHTML='<div class="tl">'+d.l+' \u2014 Cycle '+d.n+' (C'+d.j+')</div>'
+  tt.innerHTML='<div class="tl">'+d.l+' \u2014 '+d.env+' Cycle '+d.n+' (C'+d.j+')</div>'
     +'<div class="tc">'+d.env+' \u00b7 '+CN[d.c]+' \u00b7 '+d.t+'</div>'
     +'<div class="td">Billing: '+d.s+' \u2013 '+d.m+' &nbsp;\u00b7&nbsp; Grace: '+d.gs+' \u2013 '+d.e+'</div>'
     +'<div class="tp">'+d.d.replace(/</g,"&lt;")+'</div>';
@@ -340,11 +352,11 @@ document.addEventListener("pointerout",function(e){
 document.querySelectorAll("[data-cat]").forEach(function(btn){
   btn.addEventListener("click",function(){
     document.querySelectorAll("[data-cat]").forEach(function(b){b.classList.remove("active")});
-    btn.classList.add("active");filt=btn.dataset.cat;renderAll()
+    btn.classList.add("active");filt=btn.dataset.cat;render()
   })
 });
 
-renderAll();
+computeRange();render();
 </script>
 </body>
 </html>
