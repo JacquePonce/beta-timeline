@@ -64,9 +64,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .bar:hover{filter:brightness(.88);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:3}
 .bar .bt{overflow:hidden;text-overflow:ellipsis}
 
-.milestone{position:absolute;width:12px;height:12px;transform:rotate(45deg);z-index:4;cursor:default;transition:filter .12s,box-shadow .12s;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
-.milestone:hover{filter:brightness(.85);box-shadow:0 2px 8px rgba(0,0,0,.35);z-index:5}
-
 .today-line{position:absolute;top:0;bottom:0;width:2px;background:#d32f2f;z-index:6;pointer-events:none}
 .today-label{position:absolute;top:-20px;font-size:9px;font-weight:700;color:#d32f2f;white-space:nowrap;transform:translateX(-50%);z-index:7;pointer-events:none;text-transform:uppercase;letter-spacing:.3px}
 
@@ -95,8 +92,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
 <div class="controls">
   <span class="legend-title">Environment</span>
-  <span class="legend-item"><span class="legend-swatch" style="background:#2e7d32"></span>STG (Staging)</span>
-  <span class="legend-item"><span class="legend-swatch" style="background:#1565c0"></span>PROD (Production)</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:#ce93d8"></span>STG (Staging)</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:#6a1b9a"></span>PROD (Production)</span>
   <span class="sep"></span>
   <span class="phase-legend"><span class="phase-swatch" style="background:rgba(0,0,0,.07)"></span>Weekend</span>
   <span class="phase-legend"><span class="phase-swatch" style="background:transparent;border-left:3px dashed rgba(126,87,194,.6)"></span>BR Holiday</span>
@@ -303,24 +300,18 @@ function render(){
       var ss=pD(f.stg.start),se=pD(f.stg.end);
       var sOff=dBetween(T0,ss),sSpan=dBetween(ss,se)+1;
       var sLeft=sOff*PPD,sW=Math.max(sSpan*PPD-2,16);
-      html+='<div class="bar" style="left:'+sLeft+'px;width:'+sW+'px;top:6px;background:rgba(46,125,50,.18);border:2px solid #2e7d32;color:#1b5e20"'
+      html+='<div class="bar" style="left:'+sLeft+'px;width:'+sW+'px;top:6px;background:rgba(206,147,216,.3);border:2px solid #ce93d8;color:#6a1b9a"'
         +' data-n="'+f.n.replace(/"/g,"&quot;")+'" data-env="STG" data-start="'+fmtFull(ss)+'" data-end="'+fmtFull(se)+'" data-sc="'+f.sc.replace(/"/g,"&quot;")+'" data-cat="'+f.cat+'">'
         +'<span class="bt">STG: '+fmt(ss)+'</span></div>';
-      var mLeft=sOff*PPD+Math.floor(PPD/2)-6;
-      html+='<div class="milestone" style="left:'+mLeft+'px;top:8px;background:#2e7d32"'
-        +' data-n="'+f.n.replace(/"/g,"&quot;")+'" data-env="STG" data-start="'+fmtFull(ss)+'" data-end="'+fmtFull(se)+'" data-sc="'+f.sc.replace(/"/g,"&quot;")+'" data-cat="'+f.cat+'"></div>';
     }
 
     if(envFilt!=="stg"&&f.prod){
       var ps=pD(f.prod.start),pe=pD(f.prod.end);
       var pOff=dBetween(T0,ps),pSpan=dBetween(ps,pe)+1;
       var pLeft=pOff*PPD,pW=Math.max(pSpan*PPD-2,16);
-      html+='<div class="bar" style="left:'+pLeft+'px;width:'+pW+'px;top:'+26+'px;background:rgba(21,101,192,.15);border:2px solid #1565c0;color:#0d47a1"'
+      html+='<div class="bar" style="left:'+pLeft+'px;width:'+pW+'px;top:'+26+'px;background:rgba(106,27,154,.2);border:2px solid #6a1b9a;color:#4a148c"'
         +' data-n="'+f.n.replace(/"/g,"&quot;")+'" data-env="PROD" data-start="'+fmtFull(ps)+'" data-end="'+fmtFull(pe)+'" data-sc="'+f.sc.replace(/"/g,"&quot;")+'" data-cat="'+f.cat+'">'
         +'<span class="bt">PROD: '+fmt(ps)+'</span></div>';
-      var pmLeft=pOff*PPD+Math.floor(PPD/2)-6;
-      html+='<div class="milestone" style="left:'+pmLeft+'px;top:28px;background:#1565c0"'
-        +' data-n="'+f.n.replace(/"/g,"&quot;")+'" data-env="PROD" data-start="'+fmtFull(ps)+'" data-end="'+fmtFull(pe)+'" data-sc="'+f.sc.replace(/"/g,"&quot;")+'" data-cat="'+f.cat+'"></div>';
     }
 
     html+='</div></div>';
@@ -341,7 +332,7 @@ function showTT(el){
   tt.style.display="block";
 }
 document.addEventListener("pointerover",function(e){
-  var b=e.target.closest(".bar")||e.target.closest(".milestone");
+  var b=e.target.closest(".bar");
   if(!b){tt.style.display="none";return}
   showTT(b);
 });
@@ -353,8 +344,8 @@ document.addEventListener("pointermove",function(e){
   tt.style.left=x+"px";tt.style.top=y+"px";
 });
 document.addEventListener("pointerout",function(e){
-  var t=e.target.closest(".bar")||e.target.closest(".milestone");
-  if(t&&!e.relatedTarget?.closest(".bar")&&!e.relatedTarget?.closest(".milestone"))tt.style.display="none";
+  var t=e.target.closest(".bar");
+  if(t&&!e.relatedTarget?.closest(".bar"))tt.style.display="none";
 });
 
 document.querySelectorAll("[data-cat]").forEach(function(btn){
