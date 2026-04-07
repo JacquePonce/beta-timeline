@@ -124,11 +124,11 @@ var FEATURES = [
   {g:"Core Billing"},
   {n:"Purchases + Bill Close + Statement",cat:"core",
     stg:{start:"2026-04-20",end:"2026-06-08"},
-    prod:{start:"2026-05-11",end:"2026-07-22"},
+    prod:{start:"2026-05-11",end:"2026-07-25"},
     sc:"REV 1\u20137, LAT 8\u201316, 2LAT 17\u201320, RVSL 21\u201329, OTH 30\u201332"},
   {n:"Payment Processing (min / partial / full)",cat:"core",
     stg:{start:"2026-04-20",end:"2026-06-08"},
-    prod:{start:"2026-05-11",end:"2026-07-22"},
+    prod:{start:"2026-05-11",end:"2026-07-25"},
     sc:"REV 1\u20137, LAT 8\u201316, 2LAT 17\u201320"},
 
   {g:"Revolving"},
@@ -144,19 +144,19 @@ var FEATURES = [
   {g:"Lateness"},
   {n:"Late Detection + DPD Tracking",cat:"lateness",
     stg:{start:"2026-05-18",end:"2026-06-05"},
-    prod:{start:"2026-05-26",end:"2026-07-16"},
+    prod:{start:"2026-05-26",end:"2026-07-25"},
     sc:"LAT 8\u201316, 2LAT 17\u201320"},
   {n:"1st Late Fee Application",cat:"lateness",
     stg:{start:"2026-05-18",end:"2026-06-05"},
-    prod:{start:"2026-05-26",end:"2026-07-16"},
+    prod:{start:"2026-05-26",end:"2026-07-25"},
     sc:"LAT 8\u201316, 2LAT 17\u201320"},
   {n:"Late Fee $30 Cap Logic",cat:"lateness",
     stg:{start:"2026-06-01",end:"2026-06-05"},
-    prod:{start:"2026-06-08",end:"2026-06-30"},
+    prod:{start:"2026-06-17",end:"2026-07-09"},
     sc:"LAT 15"},
   {n:"Late Fee Waiver",cat:"lateness",
     stg:{start:"2026-05-18",end:"2026-06-05"},
-    prod:{start:"2026-06-05",end:"2026-07-16"},
+    prod:{start:"2026-06-05",end:"2026-07-25"},
     sc:"LAT 16, 2LAT 17\u201320"},
   {n:"2nd Late Fee (consecutive late)",cat:"lateness",
     stg:{start:"2026-05-18",end:"2026-05-28"},
@@ -166,7 +166,7 @@ var FEATURES = [
   {g:"Reversals"},
   {n:"Full Reversal (same cycle)",cat:"reversal",
     stg:{start:"2026-05-25",end:"2026-06-04"},
-    prod:{start:"2026-06-14",end:"2026-07-16"},
+    prod:{start:"2026-06-14",end:"2026-07-12"},
     sc:"RVSL 21, 22, 23, 25"},
   {n:"Full Reversal (cross-cycle + prepaid)",cat:"reversal",
     stg:{start:"2026-05-31",end:"2026-06-04"},
@@ -208,7 +208,7 @@ var CAT_DOTS = {
   core:"#78909c",revolving:"#2e7d32",lateness:"#546e7a",reversal:"#1565c0",other:"#b71c1c"
 };
 
-var T0=new Date(2026,3,7), T1=new Date(2026,6,25);
+var T0=new Date(2026,3,7), T1=new Date(2026,7,1);
 var PPD=14, ROW_H=48, CW=260;
 var MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var DN=["S","M","T","W","T","F","S"];
