@@ -12,6 +12,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .nav-bar a{color:#fff;text-decoration:none;padding:5px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.35);transition:all .15s;font-weight:500}
 .nav-bar a:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.6)}
 .nav-env{color:rgba(255,255,255,.7);margin-left:4px}
+.refresh-btn{margin-left:auto;padding:5px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;cursor:pointer;font-weight:500;font-size:12px;transition:all .15s;font-family:inherit}.refresh-btn:hover:not(:disabled){background:rgba(255,255,255,.15)}.refresh-btn:disabled{opacity:.5;cursor:wait}
 .top-bar{padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e0e0e0}
 .top-bar h1{font-size:20px;font-weight:600;color:#1a1a1a}
 .top-bar p{font-size:13px;color:#666;margin-top:4px}
@@ -81,6 +82,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
   <a href="staging.html">Staging</a>
   <a href="production.html">Production</a>
   <span class="nav-env">STG + PROD</span>
+  <button id="refreshBtn" class="refresh-btn" onclick="refreshData()">&#x21bb; Refresh from Sheet</button>
 </div>
 
 <div class="top-bar">
@@ -352,6 +354,66 @@ document.querySelectorAll("[data-cat]").forEach(function(btn){
     btn.classList.add("active");filt=btn.dataset.cat;render()
   })
 });
+
+var SHEET_ID="1EFOaXjphqTGXcQLI-TR7p4h7EY4PfAl3sptwbSZwVDg";
+var CAT_MAP={"Revolving":"rev","Lateness":"lat","2nd Late":"2lat","Reversal":"rvsl","Others":"oth"};
+var ALL_BR={"2026-04-21":"Tiradentes","2026-05-01":"Labor Day","2026-06-04":"Corpus Christi","2026-09-07":"Independence Day BR"};
+var ALL_US={"2026-05-25":"Memorial Day","2026-06-19":"Juneteenth","2026-07-03":"Independence Day (obs)","2026-09-07":"Labor Day US"};
+
+function fetchGviz(sh){return new Promise(function(ok,no){
+  var cb="_g"+(Date.now()%1e7);
+  window[cb]=function(r){delete window[cb];el.parentNode&&el.parentNode.removeChild(el);
+    r.status==="error"?no(new Error("Sheet error")):ok(r)};
+  var el=document.createElement("script");
+  el.onerror=function(){delete window[cb];el.parentNode&&el.parentNode.removeChild(el);no(new Error("Network error"))};
+  el.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?sheet="+encodeURIComponent(sh)+"&range=A1:BL50&tqx=out:json;responseHandler:"+cb;
+  document.head.appendChild(el)})}
+
+function gR(d){var out=[],t=d.table;for(var i=0;i<t.rows.length;i++){var r=t.rows[i],row=[];
+  if(!r.c){out.push(row);continue}
+  for(var j=0;j<r.c.length;j++){var c=r.c[j];
+    if(!c||c.v==null){row.push("");continue}
+    var v=c.v;if(typeof v==="string"&&v.indexOf("Date(")==0){
+      var m=v.match(/Date\((\d+),(\d+),(\d+)\)/);
+      row.push(m?pad2(+m[3])+"/"+pad2(+m[2]+1)+"/"+m[1]:(c.f||""))
+    }else row.push(String(v))}
+  out.push(row)}return out}
+
+function cD(s){if(!s)return null;var p=s.split("/");return p.length===3&&p[2].length===4?p[2]+"-"+p[1]+"-"+p[0]:null}
+function pLbl(r){var m=r.match(/^(\D+?)(\d+)/);if(!m)return r;var n=+m[2];return m[1].trim()+" "+(n<10?"0"+n:""+n)}
+function toFT(r){return r?r.replace("Fast Track ","FT "):""}
+function pDesc(r){return r?r.split("\n")[0].trim():""}
+function pCust(r){var m=(r||"").match(/(\d+)/);return m?+m[1]:0}
+
+function parseSTG(rows){var sc=[],cat="rev";for(var i=6;i<rows.length;i++){var r=rows[i];if(!r||!r.length)continue;
+  var f=(r[0]||"").trim();if(CAT_MAP[f]){cat=CAT_MAP[f];continue}
+  var lb=(r[1]||"").trim();if(!lb||!/\d/.test(lb))continue;var cy=[];
+  var a=[cD(r[9]),cD(r[10]),cD(r[12])];if(a[0]&&a[1]&&a[2])cy.push(a);
+  var b=[cD(r[25]),cD(r[26]),cD(r[28])];if(b[0]&&b[1]&&b[2])cy.push(b);
+  var c=[cD(r[41]),cD(r[42]),cD(r[44])];if(c[0]&&c[1]&&c[2])cy.push(c);
+  if(cy.length)sc.push({l:pLbl(lb),c:cat,t:toFT(r[4]||""),d:pDesc(r[2]||""),cy:cy})}return sc}
+
+function parsePROD(rows){var sc=[],cat="rev";for(var i=6;i<rows.length;i++){var r=rows[i];if(!r||!r.length)continue;
+  var f=(r[0]||"").trim();if(CAT_MAP[f]){cat=CAT_MAP[f];continue}
+  var lb=(r[1]||"").trim();if(!lb||!/\d/.test(lb))continue;var cy=[];
+  var a=[cD(r[17]),cD(r[18]),cD(r[20])];if(a[0]&&a[1]&&a[2])cy.push(a);
+  var b=[cD(r[33]),cD(r[34]),cD(r[36])];if(b[0]&&b[1]&&b[2])cy.push(b);
+  var c=[cD(r[49]),cD(r[50]),cD(r[52])];if(c[0]&&c[1]&&c[2])cy.push(c);
+  if(cy.length)sc.push({l:pLbl(lb),c:cat,u:pCust(r[4]||""),t:toFT(r[5]||""),d:pDesc(r[2]||""),cy:cy})}return sc}
+
+function updHol(){HOL_BR={};HOL_US={};var a=T0.getTime(),b=T1.getTime();
+  for(var k in ALL_BR){if(pD(k).getTime()>=a&&pD(k).getTime()<=b)HOL_BR[k]=ALL_BR[k]}
+  for(var k in ALL_US){if(pD(k).getTime()>=a&&pD(k).getTime()<=b)HOL_US[k]=ALL_US[k]}}
+
+function refreshData(){var btn=document.getElementById("refreshBtn");btn.disabled=true;btn.textContent="Loading\u2026";
+  Promise.all([fetchGviz("[STG] E2E Beta Testing_detail plan"),fetchGviz("[PROD] E2E Beta Testing_detail plan")]).then(function(res){
+    var ns=parseSTG(gR(res[0])),np=parsePROD(gR(res[1]));
+    if(!ns.length&&!np.length)throw new Error("No scenarios parsed");
+    S_STG=ns;S_PRD=np;computeRange();updHol();render();
+    btn.textContent="\u2713 Updated!";setTimeout(function(){btn.textContent="\u21bb Refresh from Sheet";btn.disabled=false},2500)
+  }).catch(function(e){btn.textContent="\u2717 Failed";console.error(e);
+    alert("Could not fetch data.\n\n"+e.message+"\n\nEnsure the spreadsheet is shared as 'Anyone with the link can view'.");
+    setTimeout(function(){btn.textContent="\u21bb Refresh from Sheet";btn.disabled=false},3000)})}
 
 computeRange();render();
 </script>
