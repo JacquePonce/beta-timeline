@@ -142,38 +142,38 @@ var CLR = {
 };
 
 var S = [
-  {l:"REV 01",c:"rev",t:"FT 2.0",d:"Revolver \u2192 Keeps revolving",cy:[["2026-05-05","2026-05-08","2026-05-10"],["2026-05-09","2026-05-12","2026-05-14"],["2026-05-13","2026-05-16","2026-05-18"]]},
-  {l:"REV 02",c:"rev",t:"FT 1.0",d:"Revolver \u2192 Leaves revolving",cy:[["2026-05-18","2026-05-20","2026-05-21"],["2026-05-21","2026-05-23","2026-05-24"]]},
-  {l:"REV 03",c:"rev",t:"FT 1.0",d:"Revolver (partial) \u2192 Leaves revolving",cy:[["2026-05-18","2026-05-20","2026-05-21"],["2026-05-21","2026-05-23","2026-05-24"]]},
-  {l:"REV 04",c:"rev",t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (partial)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
-  {l:"REV 05",c:"rev",t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
-  {l:"REV 06",c:"rev",t:"FT 1.0",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
-  {l:"REV 07",c:"rev",t:"FT 1.0",d:"Revolver \u2192 Leaves revolving \u2192 Revolver",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"],["2026-05-31","2026-06-02","2026-06-03"]]},
-  {l:"LAT 08",c:"lat",t:"FT 2.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-02","2026-06-05","2026-06-07"],["2026-06-06","2026-06-09","2026-06-11"]]},
-  {l:"LAT 09",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-02","2026-06-04","2026-06-05"],["2026-06-05","2026-06-07","2026-06-08"]]},
-  {l:"LAT 10",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-08","2026-06-10","2026-06-11"],["2026-06-11","2026-06-13","2026-06-14"],["2026-06-14","2026-06-16","2026-06-17"]]},
-  {l:"LAT 11",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-08","2026-06-10","2026-06-11"],["2026-06-11","2026-06-13","2026-06-14"]]},
-  {l:"LAT 12",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
-  {l:"LAT 13",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
-  {l:"LAT 14",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
-  {l:"LAT 15",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"LAT 16",c:"lat",t:"FT 1.0",d:"Late & Revolver \u2192 Late Fee Waived \u2192 Leaves late",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"2LAT 17",c:"2lat",t:"FT 2.0",d:"Late \u2192 Keeps late & revolving \u2192 Current",cy:[["2026-06-02","2026-06-05","2026-06-07"],["2026-06-06","2026-06-09","2026-06-11"]]},
-  {l:"2LAT 18",c:"2lat",t:"FT 1.0",d:"Late \u2192 Keeps late & revolving",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
-  {l:"2LAT 19",c:"2lat",t:"FT 1.0",d:"Late \u2192 Keeps late & revolving",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
-  {l:"2LAT 20",c:"2lat",t:"FT 1.0",d:"Late \u2192 Late Fee Waived \u2192 Keeps late",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
-  {l:"RVSL 21",c:"rvsl",t:"FT 2.0",d:"Reversal same cycle - not revolver",cy:[["2026-06-12","2026-06-15","2026-06-17"],["2026-06-16","2026-06-19","2026-06-21"]]},
-  {l:"RVSL 22",c:"rvsl",t:"FT 1.0",d:"Reversal same cycle - single purchase",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 23",c:"rvsl",t:"FT 1.0",d:"Reversal same cycle - bill < $25",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 24",c:"rvsl",t:"FT 1.0",d:"Reversal different cycle - prepaid balance",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 25",c:"rvsl",t:"FT 1.0",d:"Reversal same cycle - revolver",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 26",c:"rvsl",t:"FT 1.0",d:"Reversal different cycle - late",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 27",c:"rvsl",t:"FT 1.0",d:"Reversal different cycle - reversal > outstanding",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 28",c:"rvsl",t:"FT 1.0",d:"Partial reversals",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"RVSL 29",c:"rvsl",t:"FT 1.0",d:"Partial reversals - interest reversal",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
-  {l:"OTH 30",c:"oth",t:"FT 1.0",d:"Usage of prepaid balance for new purchases",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]},
-  {l:"OTH 31",c:"oth",t:"FT 1.0",d:"Overlimit balance",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]},
-  {l:"OTH 32",c:"oth",t:"FT 1.0",d:"Manual adjustment",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]}
+  {l:"REV 01",c:"rev",t:"FT 2.0",w:"Wave 1",d:"Revolver \u2192 Keeps revolving",cy:[["2026-05-05","2026-05-08","2026-05-10"],["2026-05-09","2026-05-12","2026-05-14"],["2026-05-13","2026-05-16","2026-05-18"]]},
+  {l:"REV 02",c:"rev",t:"FT 1.0",w:"Wave 1",d:"Revolver \u2192 Leaves revolving",cy:[["2026-05-18","2026-05-20","2026-05-21"],["2026-05-21","2026-05-23","2026-05-24"]]},
+  {l:"REV 03",c:"rev",t:"FT 1.0",w:"Wave 2",d:"Revolver (partial) \u2192 Leaves revolving",cy:[["2026-05-18","2026-05-20","2026-05-21"],["2026-05-21","2026-05-23","2026-05-24"]]},
+  {l:"REV 04",c:"rev",t:"FT 1.0",w:"Wave 2",d:"Revolver \u2192 Leaves revolving (partial)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
+  {l:"REV 05",c:"rev",t:"FT 1.0",w:"Wave 4",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
+  {l:"REV 06",c:"rev",t:"FT 1.0",w:"Wave 4",d:"Revolver \u2192 Leaves revolving (mid cycle)",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"]]},
+  {l:"REV 07",c:"rev",t:"FT 1.0",w:"Wave 4",d:"Revolver \u2192 Leaves revolving \u2192 Revolver",cy:[["2026-05-25","2026-05-27","2026-05-28"],["2026-05-28","2026-05-30","2026-05-31"],["2026-05-31","2026-06-02","2026-06-03"]]},
+  {l:"LAT 08",c:"lat",t:"FT 2.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-02","2026-06-05","2026-06-07"],["2026-06-06","2026-06-09","2026-06-11"]]},
+  {l:"LAT 09",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-02","2026-06-04","2026-06-05"],["2026-06-05","2026-06-07","2026-06-08"]]},
+  {l:"LAT 10",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-08","2026-06-10","2026-06-11"],["2026-06-11","2026-06-13","2026-06-14"],["2026-06-14","2026-06-16","2026-06-17"]]},
+  {l:"LAT 11",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-08","2026-06-10","2026-06-11"],["2026-06-11","2026-06-13","2026-06-14"]]},
+  {l:"LAT 12",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late; keeps revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
+  {l:"LAT 13",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
+  {l:"LAT 14",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-14","2026-06-16","2026-06-17"],["2026-06-17","2026-06-19","2026-06-20"]]},
+  {l:"LAT 15",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Leaves late & revolving",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"LAT 16",c:"lat",t:"FT 1.0",w:"Wave 3",d:"Late & Revolver \u2192 Late Fee Waived \u2192 Leaves late",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"2LAT 17",c:"2lat",t:"FT 2.0",w:"Wave 5",d:"Late \u2192 Keeps late & revolving \u2192 Current",cy:[["2026-06-02","2026-06-05","2026-06-07"],["2026-06-06","2026-06-09","2026-06-11"]]},
+  {l:"2LAT 18",c:"2lat",t:"FT 1.0",w:"Wave 5",d:"Late \u2192 Keeps late & revolving",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
+  {l:"2LAT 19",c:"2lat",t:"FT 1.0",w:"Wave 5",d:"Late \u2192 Keeps late & revolving",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
+  {l:"2LAT 20",c:"2lat",t:"FT 1.0",w:"Wave 5",d:"Late \u2192 Late Fee Waived \u2192 Keeps late",cy:[["2026-06-10","2026-06-12","2026-06-13"],["2026-06-13","2026-06-15","2026-06-16"]]},
+  {l:"RVSL 21",c:"rvsl",t:"FT 2.0",w:"Wave 6",d:"Reversal same cycle - not revolver",cy:[["2026-06-12","2026-06-15","2026-06-17"],["2026-06-16","2026-06-19","2026-06-21"]]},
+  {l:"RVSL 22",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal same cycle - single purchase",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 23",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal same cycle - bill < $25",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 24",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal different cycle - prepaid balance",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 25",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal same cycle - revolver",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 26",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal different cycle - late",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 27",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Reversal different cycle - reversal > outstanding",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 28",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Partial reversals",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"RVSL 29",c:"rvsl",t:"FT 1.0",w:"Wave 6",d:"Partial reversals - interest reversal",cy:[["2026-06-20","2026-06-22","2026-06-23"],["2026-06-23","2026-06-25","2026-06-26"]]},
+  {l:"OTH 30",c:"oth",t:"FT 1.0",w:"Wave 7",d:"Usage of prepaid balance for new purchases",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]},
+  {l:"OTH 31",c:"oth",t:"FT 1.0",w:"Wave 7",d:"Overlimit balance",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]},
+  {l:"OTH 32",c:"oth",t:"FT 1.0",w:"Wave 3",d:"Manual adjustment",cy:[["2026-06-26","2026-06-28","2026-06-29"],["2026-06-29","2026-07-01","2026-07-02"]]}
 ];
 
 var T0 = new Date(2026, 4, 5);
@@ -263,7 +263,7 @@ function render(){
       var bg="linear-gradient(to right,"+col[0]+" "+pct+"%,"+col[1]+" "+pct+"%)";
       var txt="C"+j+" \u2022 "+fmt(sd)+" \u2013 "+fmt(ed);
       html+='<div class="bar" style="left:'+left+'px;width:'+bw+'px;top:'+top+'px;background:'+bg+';color:'+col[2]+'"'
-        +' data-l="'+s.l+'" data-c="'+s.c+'" data-t="'+s.t+'" data-d="'+s.d.replace(/"/g,'&quot;')+'"'
+        +' data-l="'+s.l+'" data-c="'+s.c+'" data-t="'+s.t+'" data-w="'+(s.w||"")+'" data-d="'+s.d.replace(/"/g,'&quot;')+'"'
         +' data-n="'+(j+1)+'" data-j="'+j+'" data-s="'+fmt(sd)+'" data-e="'+fmt(ed)+'" data-m="'+fmt(cd)+'" data-gs="'+fmt(gs)+'">'
         +'<span class="bt">'+txt+'</span></div>';
     }
@@ -277,7 +277,7 @@ var tt=document.getElementById("tt");
 document.addEventListener("pointerover",function(e){
   var b=e.target.closest(".bar");if(!b){tt.style.display="none";return}var d=b.dataset;
   tt.innerHTML='<div class="tl">'+d.l+' \u2014 Cycle '+d.n+' (C'+d.j+')</div>'
-    +'<div class="tc">'+CN[d.c]+' \u00b7 '+d.t+'</div>'
+    +'<div class="tc">'+CN[d.c]+' \u00b7 '+d.t+(d.w?' \u00b7 '+d.w:'')+'</div>'
     +'<div class="td">Billing: '+d.s+' \u2013 '+d.m+' &nbsp;\u00b7&nbsp; Grace: '+d.gs+' \u2013 '+d.e+'</div>'
     +'<div class="tp">'+d.d.replace(/</g,"&lt;")+'</div>';
   tt.style.display="block"
@@ -311,10 +311,10 @@ function pDesc(r){return r?r.split("\n")[0].trim():""}
 function parseSTG(rows){var sc=[],cat="rev";for(var i=6;i<rows.length;i++){var r=rows[i];if(!r||!r.length)continue;
   var f=(r[0]||"").trim();if(CAT_MAP[f]){cat=CAT_MAP[f];continue}
   var lb=(r[1]||"").trim();if(!lb||!/\d/.test(lb))continue;var cy=[];
-  var a=[cD(r[9]),cD(r[10]),cD(r[12])];if(a[0]&&a[1]&&a[2])cy.push(a);
-  var b=[cD(r[25]),cD(r[26]),cD(r[28])];if(b[0]&&b[1]&&b[2])cy.push(b);
-  var c=[cD(r[41]),cD(r[42]),cD(r[44])];if(c[0]&&c[1]&&c[2])cy.push(c);
-  if(cy.length)sc.push({l:pLbl(lb),c:cat,t:toFT(r[4]||""),d:pDesc(r[2]||""),cy:cy})}return sc}
+  var a=[cD(r[10]),cD(r[11]),cD(r[13])];if(a[0]&&a[1]&&a[2])cy.push(a);
+  var b=[cD(r[26]),cD(r[27]),cD(r[29])];if(b[0]&&b[1]&&b[2])cy.push(b);
+  var c=[cD(r[42]),cD(r[43]),cD(r[45])];if(c[0]&&c[1]&&c[2])cy.push(c);
+  if(cy.length)sc.push({l:pLbl(lb),c:cat,t:toFT(r[5]||""),w:(r[3]||"").trim(),d:pDesc(r[2]||""),cy:cy})}return sc}
 
 function updHol(){HOL_BR={};HOL_US={};var a=T0.getTime(),b=T1.getTime();
   for(var k in ALL_BR){if(pD(k).getTime()>=a&&pD(k).getTime()<=b)HOL_BR[k]=ALL_BR[k]}
