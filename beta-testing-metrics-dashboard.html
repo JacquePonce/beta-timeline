@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Troy CC US Beta &mdash; Metrics Dashboard | Beta E2E</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',-apple-system,sans-serif; background:#f5f4f9; color:#1a1a2e; padding:24px; min-height:100vh; }
+
+  /* ── Header ── */
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .header h1 { font-size:24px; font-weight:700; color:#820ad1; }
+  .header .meta { font-size:12px; color:#888; text-align:right; }
+  .header .live { display:inline-block; background:#d4edda; color:#155724; padding:2px 10px; border-radius:12px; font-weight:600; font-size:11px; margin-left:8px; }
+
+  /* ── Tabs ── */
+  .tabs { display:flex; gap:8px; margin-bottom:24px; }
+  .tab { padding:10px 28px; border-radius:24px; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; border:2px solid #820ad1; background:#fff; color:#820ad1; }
+  .tab:hover { background:#f3e8ff; }
+  .tab.active { background:#820ad1; color:#fff; }
+  .view { display:none; }
+  .view.active { display:block; }
+
+  /* ── North Star ── */
+  .north-star { background:linear-gradient(135deg,#820ad1,#5a078f); border-radius:12px; padding:24px 32px; color:#fff; display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px; }
+  .ns-left .ns-label { font-size:12px; text-transform:uppercase; letter-spacing:2px; opacity:.7; margin-bottom:6px; }
+  .ns-left .ns-text { font-size:15px; font-weight:500; max-width:500px; }
+  .ns-kpis { display:flex; gap:32px; }
+  .ns-kpi { text-align:center; }
+  .ns-kpi .num { font-size:36px; font-weight:700; }
+  .ns-kpi .lbl { font-size:11px; opacity:.7; margin-top:2px; }
+
+  /* ── Section title ── */
+  .section-title { font-size:13px; font-weight:700; color:#820ad1; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:14px; }
+
+  /* ── Gates ── */
+  .gates-row { display:flex; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
+  .gate-card { background:#fff; border-radius:10px; padding:16px; display:flex; align-items:flex-start; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); flex:1; min-width:180px; }
+  .gate-light { width:14px; height:14px; border-radius:50%; flex-shrink:0; margin-top:2px; }
+  .gate-green .gate-light { background:#28a745; box-shadow:0 0 8px rgba(40,167,69,.4); }
+  .gate-yellow .gate-light { background:#ffc107; box-shadow:0 0 8px rgba(255,193,7,.4); }
+  .gate-red .gate-light { background:#dc3545; box-shadow:0 0 8px rgba(220,53,69,.4); }
+  .gate-name { font-size:12px; font-weight:600; color:#333; }
+  .gate-value { font-size:16px; font-weight:700; color:#1a1a2e; margin:4px 0 2px; }
+  .gate-req { font-size:10px; color:#888; }
+
+  /* ── Timeline ── */
+  .timeline-card { background:#fff; border-radius:10px; padding:20px 24px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .tl-bar { position:relative; height:24px; background:#eee; border-radius:12px; margin:12px 0; }
+  .tl-fill { height:100%; border-radius:12px; }
+  .tl-fill.stg-fill { background:linear-gradient(90deg,#6c757d,#adb5bd); }
+  .tl-fill.prod-fill { background:linear-gradient(90deg,#820ad1,#c89aff); }
+  .tl-marker { position:absolute; top:-4px; width:4px; height:32px; background:#dc3545; border-radius:2px; }
+  .tl-labels { display:flex; justify-content:space-between; font-size:10px; color:#888; }
+  .tl-today { font-weight:600; color:#dc3545; }
+  .tl-phases { display:flex; gap:16px; margin-top:10px; font-size:11px; flex-wrap:wrap; }
+  .tl-phase { display:flex; align-items:center; gap:6px; }
+  .tl-dot { width:10px; height:10px; border-radius:5px; }
+
+  /* ── Layout ── */
+  .main-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:24px; }
+  .card { background:#fff; border-radius:10px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+
+  /* ── Filter row ── */
+  .filter-row { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-btn { padding:4px 14px; border-radius:20px; border:1.5px solid #ddd; background:#fff; color:#666; font-size:11px; font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
+  .filter-btn:hover { border-color:#820ad1; color:#820ad1; }
+  .filter-btn.active { background:#820ad1; border-color:#820ad1; color:#fff; }
+
+  /* ── Scenario table ── */
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { background:#f8f7fc; color:#555; padding:10px 12px; text-align:left; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; border-bottom:2px solid #eee; position:sticky; top:0; z-index:1; }
+  td { padding:8px 12px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  tr:hover td { background:#faf9fe; }
+  a { color:#820ad1; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .scenario-id { font-weight:600; color:#333; white-space:nowrap; }
+  .desc-col { color:#555; max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .no-ticket { color:#bbb; font-size:11px; font-style:italic; }
+
+  /* ── Category badges ── */
+  .cat-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+  .cat-revolving { background:#ede4ff; color:#5a078f; }
+  .cat-lateness  { background:#fff3cd; color:#856404; }
+  .cat-2late     { background:#ffe0b2; color:#e65100; }
+  .cat-reversal  { background:#d4edda; color:#155724; }
+  .cat-other     { background:#e8e8f0; color:#555; }
+
+  /* ── Status pills ── */
+  .status-pill { display:inline-block; padding:3px 10px; border-radius:10px; font-size:10px; font-weight:600; }
+  .status-done        { background:#d4edda; color:#155724; }
+  .status-in_progress { background:#cce5ff; color:#004085; }
+  .status-not_started { background:#f0f0f0; color:#888; }
+
+  /* ── Priority pills ── */
+  .priority-p1 { background:#f8d7da; color:#721c24; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+  .priority-p2 { background:#ffe0b2; color:#e65100; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+  .priority-p3 { background:#fff3cd; color:#856404; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+  .priority-p4 { background:#d4edda; color:#155724; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+
+  /* ── Bug summary cards ── */
+  .bug-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+  .bug-card { border-radius:8px; padding:12px; text-align:center; }
+  .bug-card .bc-num { font-size:24px; font-weight:700; }
+  .bug-card .bc-lbl { font-size:10px; font-weight:600; margin-top:2px; }
+  .bug-card.p1 { background:#f8d7da; color:#721c24; }
+  .bug-card.p2 { background:#ffe0b2; color:#e65100; }
+  .bug-card.p3 { background:#fff3cd; color:#856404; }
+  .bug-card.p4 { background:#d4edda; color:#155724; }
+
+  /* ── Progress bars ── */
+  .progress-section { margin-bottom:16px; }
+  .progress-label { display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; }
+  .progress-label strong { color:#333; }
+  .progress-label span { color:#888; }
+  .progress-bar { height:10px; background:#eee; border-radius:5px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:5px; }
+  .fill-purple { background:linear-gradient(90deg,#820ad1,#c89aff); }
+  .fill-gray   { background:linear-gradient(90deg,#6c757d,#adb5bd); }
+  .fill-green  { background:linear-gradient(90deg,#28a745,#6fcf97); }
+
+  .scenario-table-wrapper { max-height:540px; overflow-y:auto; }
+  .metrics-card { font-size:13px; color:#555; line-height:2.2; }
+  .metrics-card strong { color:#333; }
+</style>
+<style>
+.nav-bar{display:flex;align-items:center;gap:10px;padding:6px 24px;background:#6a1b9a;color:#f3e5f5;font-size:12px}
+.nav-bar a{color:#fff;text-decoration:none;padding:5px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.35);transition:all .15s;font-weight:500}
+.nav-bar a:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.6)}
+.nav-env{color:rgba(255,255,255,.7);margin-left:4px}
+.top-bar{padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e0e0e0}
+.top-bar h1{font-size:20px;font-weight:600;color:#1a1a1a}
+.top-bar p{font-size:13px;color:#666;margin-top:4px}
+.top-bar code{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;padding:1px 6px;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+body.public-portal{padding:0!important}
+.dashboard-page{padding:24px;min-height:calc(100vh - 120px);background:#f5f4f9}
+</style>
+</head>
+<body class="public-portal">
+<div class="nav-bar">
+  <a href="index.html">Home</a>
+  <a href="staging.html">Staging</a>
+  <a href="combined.html">Combined</a>
+  <a href="playground.html">Playground</a>
+  <a href="production.html">Production</a>
+  <span class="nav-env">METRICS</span>
+</div>
+<div class="top-bar">
+  <h1>Troy CC US Beta &mdash; Metrics Dashboard</h1>
+  <p>Jira snapshot: staging &amp; production scenarios, go/no-go gates, and bugs &middot; Rebuild with <code>build_dashboard.py</code> before publishing</p>
+</div>
+<div class="dashboard-page">
+<div class="header">
+  <h1>Beta Metrics Dashboard</h1>
+  <div class="meta">Troy CC US &bull; Updated: Apr 17, 2026 <span class="live">LIVE</span></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(event, 'staging')">Staging</div>
+  <div class="tab" onclick="switchTab(event, 'production')">Production</div>
+</div>
+
+<!-- ══════════════════════ STAGING VIEW ══════════════════════ -->
+<div id="view-staging" class="view active">
+
+  <div class="north-star">
+    <div class="ns-left">
+      <div class="ns-label">North Star &mdash; Staging</div>
+      <div class="ns-text">100% successful execution of critical path flows without manual intervention</div>
+    </div>
+    <div class="ns-kpis">
+      <div class="ns-kpi"><div class="num">0/32</div><div class="lbl">Scenarios Done</div></div>
+      <div class="ns-kpi"><div class="num">0%</div><div class="lbl">Completion</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Gates</div>
+  <div class="gates-row">
+        <div class="gate-card gate-red">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Scenario Coverage</div>
+            <div class="gate-value">0/32</div>
+            <div class="gate-req">29/32 required</div>
+          </div>
+        </div>
+        <div class="gate-card gate-red">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Evidence Complete</div>
+            <div class="gate-value">0/32</div>
+            <div class="gate-req">32/32 signed off</div>
+          </div>
+        </div></div>
+
+  <div class="timeline-card">
+    <div class="section-title">Staging Timeline</div>
+    <div class="tl-bar">
+      <div class="tl-fill stg-fill" style="width:0%"></div>
+      <div class="tl-marker" style="left:0%"></div>
+    </div>
+    <div class="tl-labels">
+      <span>May 4, 2026</span>
+      <span class="tl-today">&#9679; Today &mdash; Apr 17, 2026</span>
+      <span>Jul 2, 2026</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Scenario Progress</div>
+    <div class="progress-section">
+      <div class="progress-label">
+        <strong>Staging</strong>
+        <span>0 done &bull; 0 in progress &bull; 32 not started</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-gray" style="width:0%"></div></div>
+    </div>
+    <div class="filter-row"><button class="filter-btn active" onclick="filterCat(this,'all','stg-table')">All</button><button class="filter-btn" onclick="filterCat(this,'revolving','stg-table')">Revolving</button><button class="filter-btn" onclick="filterCat(this,'lateness','stg-table')">Lateness</button><button class="filter-btn" onclick="filterCat(this,'2late','stg-table')">2nd Late</button><button class="filter-btn" onclick="filterCat(this,'reversal','stg-table')">Reversal</button><button class="filter-btn" onclick="filterCat(this,'other','stg-table')">Other</button></div>
+    <div class="scenario-table-wrapper">
+      <table id="stg-table">
+        <thead><tr><th>Category</th><th>Scenario</th><th>Description</th><th>Ticket</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 1</td>
+              <td class="desc-col" title="Revolver → Keeps revolving">Revolver → Keeps revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5019" target="_blank">MRC-5019</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 2</td>
+              <td class="desc-col" title="Revolver → Leaves revolving">Revolver → Leaves revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5020" target="_blank">MRC-5020</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 3</td>
+              <td class="desc-col" title="Revolver (partial payments) → Leaves revolving">Revolver (partial payments) → Leaves revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5021" target="_blank">MRC-5021</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 4</td>
+              <td class="desc-col" title="Revolver → Leaves revolving (partial payments)">Revolver → Leaves revolving (partial payments)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5022" target="_blank">MRC-5022</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 5</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle)">Revolver → Keeps revolving → Leaves revolving (mid cycle)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5023" target="_blank">MRC-5023</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 6</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle, new purchases)">Revolver → Keeps revolving → Leaves revolving (mid cycle, new purchases)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5024" target="_blank">MRC-5024</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 7</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle) → Revolver">Revolver → Keeps revolving → Leaves revolving (mid cycle) → Revolver</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5025" target="_blank">MRC-5025</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 8</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving">Late & Revolver → Leaves late & revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5026" target="_blank">MRC-5026</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 9</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (lower than min)">Late & Revolver → Leaves late & revolving (lower than min)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5027" target="_blank">MRC-5027</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 10</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving">Late & Revolver → Leaves late; keeps revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5028" target="_blank">MRC-5028</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 11</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving (pay min before close)">Late & Revolver → Leaves late; keeps revolving (pay min before close)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5029" target="_blank">MRC-5029</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 12</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving (pay between min and statement)">Late & Revolver → Leaves late; keeps revolving (pay between min and statement)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5030" target="_blank">MRC-5030</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 13</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (pay outstanding)">Late & Revolver → Leaves late & revolving (pay outstanding)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5031" target="_blank">MRC-5031</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 14</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (pay outstanding + new purchases)">Late & Revolver → Leaves late & revolving (pay outstanding + new purchases)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5032" target="_blank">MRC-5032</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 15</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (min higher than cap)">Late & Revolver → Leaves late & revolving (min higher than cap)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5033" target="_blank">MRC-5033</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 16</td>
+              <td class="desc-col" title="Late & Revolver → Late Fee Waived → Leaves late; keeps revolving">Late & Revolver → Late Fee Waived → Leaves late; keeps revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5034" target="_blank">MRC-5034</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 17</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving → Current & revolving">Late & Revolver → Keeps late & revolving → Current & revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5035" target="_blank">MRC-5035</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 18</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving (no payments)">Late & Revolver → Keeps late & revolving (no payments)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5036" target="_blank">MRC-5036</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 19</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving (pays 1st min before close)">Late & Revolver → Keeps late & revolving (pays 1st min before close)</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5037" target="_blank">MRC-5037</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 20</td>
+              <td class="desc-col" title="Late & Revolver → Late Fee Waived → Keeps late & revolving">Late & Revolver → Late Fee Waived → Keeps late & revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5038" target="_blank">MRC-5038</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 21</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver">Reversal same cycle - not revolver</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5039" target="_blank">MRC-5039</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 22</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver - single purchase">Reversal same cycle - not revolver - single purchase</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5040" target="_blank">MRC-5040</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 23</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver - bill < $25">Reversal same cycle - not revolver - bill < $25</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5041" target="_blank">MRC-5041</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 24</td>
+              <td class="desc-col" title="Reversal different cycle - not revolver - prepaid balance">Reversal different cycle - not revolver - prepaid balance</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5043" target="_blank">MRC-5043</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 25</td>
+              <td class="desc-col" title="Reversal same cycle - revolver">Reversal same cycle - revolver</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5044" target="_blank">MRC-5044</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 26</td>
+              <td class="desc-col" title="Reversal different cycle - late - single purchase">Reversal different cycle - late - single purchase</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5045" target="_blank">MRC-5045</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 27</td>
+              <td class="desc-col" title="Reversal different cycle - revolver - reversal > outstanding">Reversal different cycle - revolver - reversal > outstanding</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5046" target="_blank">MRC-5046</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 28</td>
+              <td class="desc-col" title="Partial reversals">Partial reversals</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5047" target="_blank">MRC-5047</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 29</td>
+              <td class="desc-col" title="Partial reversals - interest reversal">Partial reversals - interest reversal</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5048" target="_blank">MRC-5048</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 30</td>
+              <td class="desc-col" title="Usage of prepaid balance for new purchases">Usage of prepaid balance for new purchases</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5049" target="_blank">MRC-5049</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 31</td>
+              <td class="desc-col" title="Overlimit balance">Overlimit balance</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5050" target="_blank">MRC-5050</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 32</td>
+              <td class="desc-col" title="Manual adjustment">Manual adjustment</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-5051" target="_blank">MRC-5051</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════ PRODUCTION VIEW ══════════════════════ -->
+<div id="view-production" class="view">
+
+  <div class="north-star">
+    <div class="ns-left">
+      <div class="ns-label">North Star &mdash; Production</div>
+      <div class="ns-text">100% successful execution of critical path flows without manual intervention</div>
+    </div>
+    <div class="ns-kpis">
+      <div class="ns-kpi"><div class="num">0/32</div><div class="lbl">Scenarios Done</div></div>
+      <div class="ns-kpi"><div class="num">0%</div><div class="lbl">Completion</div></div>
+      <div class="ns-kpi"><div class="num">0</div><div class="lbl">Open Bugs</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Go / No-Go Gates</div>
+  <div class="gates-row">
+        <div class="gate-card gate-red">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Scenario Coverage</div>
+            <div class="gate-value">0/32</div>
+            <div class="gate-req">29/32 required</div>
+          </div>
+        </div>
+        <div class="gate-card gate-red">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Evidence Complete</div>
+            <div class="gate-value">0/32</div>
+            <div class="gate-req">32/32 signed off</div>
+          </div>
+        </div>
+        <div class="gate-card gate-green">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Bug Resolution</div>
+            <div class="gate-value">0 P1, 0 P2 open</div>
+            <div class="gate-req">0 P1/P2 open</div>
+          </div>
+        </div>
+        <div class="gate-card gate-green">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">Reconciliation</div>
+            <div class="gate-value">Manual</div>
+            <div class="gate-req">0 deviations</div>
+          </div>
+        </div>
+        <div class="gate-card gate-green">
+          <div class="gate-light"></div>
+          <div class="gate-info">
+            <div class="gate-name">System Automation</div>
+            <div class="gate-value">Manual</div>
+            <div class="gate-req">All flows auto</div>
+          </div>
+        </div></div>
+
+  <div class="timeline-card">
+    <div class="section-title">Timeline</div>
+    <div class="tl-bar">
+      <div class="tl-fill prod-fill" style="width:0%"></div>
+      <div class="tl-marker" style="left:0%"></div>
+    </div>
+    <div class="tl-labels">
+      <span>May 1, 2026</span>
+      <span class="tl-today">&#9679; Today &mdash; Apr 17, 2026</span>
+      <span>Aug 18, 2026</span>
+    </div>
+    <div class="tl-phases">
+      <div class="tl-phase"><div class="tl-dot" style="background:#6c757d;"></div> Staging: May 4 – Jul 2</div>
+      <div class="tl-phase"><div class="tl-dot" style="background:#820ad1;"></div> Production: Jun 9 – Aug 18</div>
+      <div class="tl-phase"><div class="tl-dot" style="background:#28a745;"></div> F&F Target: Sep 2026</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="section-title">Scenario Progress</div>
+      <div class="progress-section">
+        <div class="progress-label">
+          <strong>Production</strong>
+          <span>0 done &bull; 0 in progress &bull; 32 not started</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill fill-green" style="width:0%"></div></div>
+      </div>
+      <div class="filter-row"><button class="filter-btn active" onclick="filterCat(this,'all','prod-table')">All</button><button class="filter-btn" onclick="filterCat(this,'revolving','prod-table')">Revolving</button><button class="filter-btn" onclick="filterCat(this,'lateness','prod-table')">Lateness</button><button class="filter-btn" onclick="filterCat(this,'2late','prod-table')">2nd Late</button><button class="filter-btn" onclick="filterCat(this,'reversal','prod-table')">Reversal</button><button class="filter-btn" onclick="filterCat(this,'other','prod-table')">Other</button></div>
+      <div class="scenario-table-wrapper">
+        <table id="prod-table">
+          <thead><tr><th>Category</th><th>Scenario</th><th>Description</th><th>Ticket</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 1</td>
+              <td class="desc-col" title="Revolver → Keeps revolving">Revolver → Keeps revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-3912" target="_blank">MRC-3912</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 2</td>
+              <td class="desc-col" title="Revolver → Leaves revolving">Revolver → Leaves revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-4394" target="_blank">MRC-4394</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 3</td>
+              <td class="desc-col" title="Revolver (partial payments) → Leaves revolving">Revolver (partial payments) → Leaves revolving</td>
+              <td><a href="https://nubank.atlassian.net/browse/MRC-4408" target="_blank">MRC-4408</a></td>
+              <td><span class="status-pill status-not_started">Backlog</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 4</td>
+              <td class="desc-col" title="Revolver → Leaves revolving (partial payments)">Revolver → Leaves revolving (partial payments)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 5</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle)">Revolver → Keeps revolving → Leaves revolving (mid cycle)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 6</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle, new purchases)">Revolver → Keeps revolving → Leaves revolving (mid cycle, new purchases)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="revolving">
+              <td><span class="cat-badge cat-revolving">Revolving</span></td>
+              <td class="scenario-id">REV 7</td>
+              <td class="desc-col" title="Revolver → Keeps revolving → Leaves revolving (mid cycle) → Revolver">Revolver → Keeps revolving → Leaves revolving (mid cycle) → Revolver</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 8</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving">Late & Revolver → Leaves late & revolving</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 9</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (lower than min)">Late & Revolver → Leaves late & revolving (lower than min)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 10</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving">Late & Revolver → Leaves late; keeps revolving</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 11</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving (pay min before close)">Late & Revolver → Leaves late; keeps revolving (pay min before close)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 12</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late; keeps revolving (pay between min and statement)">Late & Revolver → Leaves late; keeps revolving (pay between min and statement)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 13</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (pay outstanding)">Late & Revolver → Leaves late & revolving (pay outstanding)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 14</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (pay outstanding + new purchases)">Late & Revolver → Leaves late & revolving (pay outstanding + new purchases)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 15</td>
+              <td class="desc-col" title="Late & Revolver → Leaves late & revolving (min higher than cap)">Late & Revolver → Leaves late & revolving (min higher than cap)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="lateness">
+              <td><span class="cat-badge cat-lateness">Lateness</span></td>
+              <td class="scenario-id">LAT 16</td>
+              <td class="desc-col" title="Late & Revolver → Late Fee Waived → Leaves late; keeps revolving">Late & Revolver → Late Fee Waived → Leaves late; keeps revolving</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 17</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving → Current & revolving">Late & Revolver → Keeps late & revolving → Current & revolving</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 18</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving (no payments)">Late & Revolver → Keeps late & revolving (no payments)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 19</td>
+              <td class="desc-col" title="Late & Revolver → Keeps late & revolving (pays 1st min before close)">Late & Revolver → Keeps late & revolving (pays 1st min before close)</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="2late">
+              <td><span class="cat-badge cat-2late">2nd Late</span></td>
+              <td class="scenario-id">2LAT 20</td>
+              <td class="desc-col" title="Late & Revolver → Late Fee Waived → Keeps late & revolving">Late & Revolver → Late Fee Waived → Keeps late & revolving</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 21</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver">Reversal same cycle - not revolver</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 22</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver - single purchase">Reversal same cycle - not revolver - single purchase</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 23</td>
+              <td class="desc-col" title="Reversal same cycle - not revolver - bill < $25">Reversal same cycle - not revolver - bill < $25</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 24</td>
+              <td class="desc-col" title="Reversal different cycle - not revolver - prepaid balance">Reversal different cycle - not revolver - prepaid balance</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 25</td>
+              <td class="desc-col" title="Reversal same cycle - revolver">Reversal same cycle - revolver</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 26</td>
+              <td class="desc-col" title="Reversal different cycle - late - single purchase">Reversal different cycle - late - single purchase</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 27</td>
+              <td class="desc-col" title="Reversal different cycle - revolver - reversal > outstanding">Reversal different cycle - revolver - reversal > outstanding</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 28</td>
+              <td class="desc-col" title="Partial reversals">Partial reversals</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="reversal">
+              <td><span class="cat-badge cat-reversal">Reversal</span></td>
+              <td class="scenario-id">RVSL 29</td>
+              <td class="desc-col" title="Partial reversals - interest reversal">Partial reversals - interest reversal</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 30</td>
+              <td class="desc-col" title="Usage of prepaid balance for new purchases">Usage of prepaid balance for new purchases</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 31</td>
+              <td class="desc-col" title="Overlimit balance">Overlimit balance</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr>
+            <tr data-cat="other">
+              <td><span class="cat-badge cat-other">Other</span></td>
+              <td class="scenario-id">OTH 32</td>
+              <td class="desc-col" title="Manual adjustment">Manual adjustment</td>
+              <td><span class="no-ticket">— not created</span></td>
+              <td><span class="status-pill status-not_started">Not Started</span></td>
+            </tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="section-title">Bug Tracker</div>
+        <div class="bug-summary">
+          <div class="bug-card p1"><div class="bc-num">0</div><div class="bc-lbl">P1 Critical</div></div>
+          <div class="bug-card p2"><div class="bc-num">0</div><div class="bc-lbl">P2 High</div></div>
+          <div class="bug-card p3"><div class="bc-num">0</div><div class="bc-lbl">P3 Medium</div></div>
+          <div class="bug-card p4"><div class="bc-num">0</div><div class="bc-lbl">P4 Low</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Priority</th><th>Ticket</th><th>Summary</th><th>Status</th></tr></thead>
+          <tbody><tr><td colspan="4" style="text-align:center;color:#888;padding:24px;">No open bugs</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Must-Have Metrics</div>
+        <div class="metrics-card">
+          <div><strong>Scenario Coverage:</strong> 0/32 completed in Prod</div>
+          <div><strong>Evidence Sign-off:</strong> 0/32 scenarios</div>
+          <div><strong>Bug Resolution:</strong> 0 P1, 0 P2 open</div>
+          <div><strong>Reconciliation:</strong> Green (manual)</div>
+          <div><strong>System Automation:</strong> Green (manual)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(evt, view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+
+function filterCat(btn, cat, tableId) {
+  // Deactivate siblings
+  btn.closest('.filter-row').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Filter rows
+  document.getElementById(tableId).querySelectorAll('tr[data-cat]').forEach(function(row) {
+    row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
+  });
+}
+</script>
+</div>
+</body>
+</html>
