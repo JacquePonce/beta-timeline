@@ -163,7 +163,7 @@ body.public-portal{padding:0!important}
 <div class="dashboard-page">
 <div class="header">
   <h1>Beta Metrics Dashboard</h1>
-  <div class="meta">Troy CC US &bull; Updated: Apr 17, 2026</div>
+  <div class="meta">Troy CC US &bull; Updated: Mar 31, 2026</div>
 </div>
 
 <div class="tabs">
@@ -180,26 +180,26 @@ body.public-portal{padding:0!important}
       <div class="ns-text">100% successful execution of critical path flows without manual intervention</div>
     </div>
     <div class="ns-kpis">
-      <div class="ns-kpi"><div class="num">0/32</div><div class="lbl">Scenarios Done</div></div>
-      <div class="ns-kpi"><div class="num">0%</div><div class="lbl">Completion</div></div>
+      <div class="ns-kpi"><div class="num" id="stg-ns-done">0/32</div><div class="lbl">Scenarios Done</div></div>
+      <div class="ns-kpi"><div class="num" id="stg-ns-pct">0%</div><div class="lbl">Completion</div></div>
     </div>
   </div>
 
   <div class="section-title">Gates</div>
   <div class="gates-row">
-        <div class="gate-card gate-red">
+        <div class="gate-card gate-red" id="stg-gate-coverage-card">
           <div class="gate-light"></div>
           <div class="gate-info">
             <div class="gate-name">Scenario Coverage</div>
-            <div class="gate-value">0/32</div>
+            <div class="gate-value" id="stg-gate-coverage">0/32</div>
             <div class="gate-req">29/32 required</div>
           </div>
         </div>
-        <div class="gate-card gate-red">
+        <div class="gate-card gate-red" id="stg-gate-evidence-card">
           <div class="gate-light"></div>
           <div class="gate-info">
             <div class="gate-name">Evidence Complete</div>
-            <div class="gate-value">0/32</div>
+            <div class="gate-value" id="stg-gate-evidence">0/32</div>
             <div class="gate-req">32/32 signed off</div>
           </div>
         </div></div>
@@ -212,7 +212,7 @@ body.public-portal{padding:0!important}
     </div>
     <div class="tl-labels">
       <span>May 4, 2026</span>
-      <span class="tl-today">&#9679; Today &mdash; Apr 17, 2026</span>
+      <span class="tl-today">&#9679; Today &mdash; Mar 31, 2026</span>
       <span>Jul 2, 2026</span>
     </div>
   </div>
@@ -222,9 +222,9 @@ body.public-portal{padding:0!important}
     <div class="progress-section">
       <div class="progress-label">
         <strong>Staging</strong>
-        <span>0 done &bull; 0 in progress &bull; 32 not started</span>
+        <span id="stg-progress-label">0 done &bull; 0 in progress &bull; 32 not started</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill fill-gray" style="width:0%"></div></div>
+      <div class="progress-bar"><div class="progress-fill fill-gray" style="width:0%" id="stg-progress-fill"></div></div>
     </div>
     <div class="filter-row"><button class="filter-btn active" onclick="filterCat(this,'all','stg-table')">All</button><button class="filter-btn" onclick="filterCat(this,'revolving','stg-table')">Revolving</button><button class="filter-btn" onclick="filterCat(this,'lateness','stg-table')">Lateness</button><button class="filter-btn" onclick="filterCat(this,'2late','stg-table')">2nd Late</button><button class="filter-btn" onclick="filterCat(this,'reversal','stg-table')">Reversal</button><button class="filter-btn" onclick="filterCat(this,'other','stg-table')">Other</button></div>
     <div class="scenario-table-wrapper">
@@ -470,35 +470,35 @@ body.public-portal{padding:0!important}
       <div class="ns-text">100% successful execution of critical path flows without manual intervention</div>
     </div>
     <div class="ns-kpis">
-      <div class="ns-kpi"><div class="num">0/32</div><div class="lbl">Scenarios Done</div></div>
-      <div class="ns-kpi"><div class="num">0%</div><div class="lbl">Completion</div></div>
-      <div class="ns-kpi"><div class="num">0</div><div class="lbl">Open Bugs</div></div>
+      <div class="ns-kpi"><div class="num" id="prd-ns-done">0/32</div><div class="lbl">Scenarios Done</div></div>
+      <div class="ns-kpi"><div class="num" id="prd-ns-pct">0%</div><div class="lbl">Completion</div></div>
+      <div class="ns-kpi"><div class="num" id="prd-ns-bugs">0</div><div class="lbl">Open Bugs</div></div>
     </div>
   </div>
 
   <div class="section-title">Go / No-Go Gates</div>
   <div class="gates-row">
-        <div class="gate-card gate-red">
+        <div class="gate-card gate-red" id="prd-gate-coverage-card">
           <div class="gate-light"></div>
           <div class="gate-info">
             <div class="gate-name">Scenario Coverage</div>
-            <div class="gate-value">0/32</div>
+            <div class="gate-value" id="prd-gate-coverage">0/32</div>
             <div class="gate-req">29/32 required</div>
           </div>
         </div>
-        <div class="gate-card gate-red">
+        <div class="gate-card gate-red" id="prd-gate-evidence-card">
           <div class="gate-light"></div>
           <div class="gate-info">
             <div class="gate-name">Evidence Complete</div>
-            <div class="gate-value">0/32</div>
+            <div class="gate-value" id="prd-gate-evidence">0/32</div>
             <div class="gate-req">32/32 signed off</div>
           </div>
         </div>
-        <div class="gate-card gate-green">
+        <div class="gate-card gate-green" id="prd-gate-bugs-card">
           <div class="gate-light"></div>
           <div class="gate-info">
             <div class="gate-name">Bug Resolution</div>
-            <div class="gate-value">0 P1, 0 P2 open</div>
+            <div class="gate-value" id="prd-gate-bugs">0 P1, 0 P2 open</div>
             <div class="gate-req">0 P1/P2 open</div>
           </div>
         </div>
@@ -527,7 +527,7 @@ body.public-portal{padding:0!important}
     </div>
     <div class="tl-labels">
       <span>May 1, 2026</span>
-      <span class="tl-today">&#9679; Today &mdash; Apr 17, 2026</span>
+      <span class="tl-today">&#9679; Today &mdash; Mar 31, 2026</span>
       <span>Aug 18, 2026</span>
     </div>
     <div class="tl-phases">
@@ -543,9 +543,9 @@ body.public-portal{padding:0!important}
       <div class="progress-section">
         <div class="progress-label">
           <strong>Production</strong>
-          <span>0 done &bull; 0 in progress &bull; 32 not started</span>
+          <span id="prd-progress-label">0 done &bull; 0 in progress &bull; 32 not started</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill fill-green" style="width:0%"></div></div>
+        <div class="progress-bar"><div class="progress-fill fill-green" style="width:0%" id="prd-progress-fill"></div></div>
       </div>
       <div class="filter-row"><button class="filter-btn active" onclick="filterCat(this,'all','prod-table')">All</button><button class="filter-btn" onclick="filterCat(this,'revolving','prod-table')">Revolving</button><button class="filter-btn" onclick="filterCat(this,'lateness','prod-table')">Lateness</button><button class="filter-btn" onclick="filterCat(this,'2late','prod-table')">2nd Late</button><button class="filter-btn" onclick="filterCat(this,'reversal','prod-table')">Reversal</button><button class="filter-btn" onclick="filterCat(this,'other','prod-table')">Other</button></div>
       <div class="scenario-table-wrapper">
@@ -784,23 +784,40 @@ body.public-portal{padding:0!important}
       <div class="card" style="margin-bottom:20px;">
         <div class="section-title">Bug Tracker</div>
         <div class="bug-summary">
-          <div class="bug-card p1"><div class="bc-num">0</div><div class="bc-lbl">P1 Critical</div></div>
-          <div class="bug-card p2"><div class="bc-num">0</div><div class="bc-lbl">P2 High</div></div>
-          <div class="bug-card p3"><div class="bc-num">0</div><div class="bc-lbl">P3 Medium</div></div>
-          <div class="bug-card p4"><div class="bc-num">0</div><div class="bc-lbl">P4 Low</div></div>
+          <div class="bug-card p1"><div class="bc-num" id="prd-bug-p1">0</div><div class="bc-lbl">P1 Critical</div></div>
+          <div class="bug-card p2"><div class="bc-num" id="prd-bug-p2">0</div><div class="bc-lbl">P2 High</div></div>
+          <div class="bug-card p3"><div class="bc-num" id="prd-bug-p3">0</div><div class="bc-lbl">P3 Medium</div></div>
+          <div class="bug-card p4"><div class="bc-num" id="prd-bug-p4">0</div><div class="bc-lbl">P4 Low</div></div>
         </div>
-        <table>
+        <table id="bug-table">
           <thead><tr><th>Priority</th><th>Ticket</th><th>Summary</th><th>Status</th></tr></thead>
-          <tbody><tr><td colspan="4" style="text-align:center;color:#888;padding:24px;">No open bugs</td></tr></tbody>
+          <tbody>
+            <tr data-priority="p1"><td><span class="priority-p1">P1</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-5312" target="_blank">MRC-5312</a></td><td>Error payment in DA</td><td><span class="status-pill status-in_progress">In Progress</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3806" target="_blank">MRC-3806</a></td><td>Add card to Apple Wallet logs me off</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3894" target="_blank">MRC-3894</a></td><td>Unable to use another virtual credit card</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4834" target="_blank">MRC-4834</a></td><td>Long load time</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4901" target="_blank">MRC-4901</a></td><td>Credit Card Screen</td><td><span class="status-pill status-in_progress">In Progress</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4902" target="_blank">MRC-4902</a></td><td>High delay in creating a 24h virtual card</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4903" target="_blank">MRC-4903</a></td><td>Mismatched balance and availability</td><td><span class="status-pill status-in_progress">In Progress</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4904" target="_blank">MRC-4904</a></td><td>Incorrect math in notifications</td><td><span class="status-pill status-in_progress">In Progress</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-4912" target="_blank">MRC-4912</a></td><td>Adjust credit limit gives an error</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-5318" target="_blank">MRC-5318</a></td><td>Credit card bill payment experience</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-5323" target="_blank">MRC-5323</a></td><td>Unable to unblock credit card</td><td><span class="status-pill status-not_started">Backlog</span></td></tr>
+            <tr data-priority="p3"><td><span class="priority-p3">P3</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3784" target="_blank">MRC-3784</a></td><td>Unable to pay my CC bill</td><td><span class="status-pill status-done">Done</span></td></tr>
+            <tr data-priority="p4"><td><span class="priority-p4">P4</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3619" target="_blank">MRC-3619</a></td><td>Error Screen After Successful Bill Payment Flow (ACH)</td><td><span class="status-pill status-done">Done</span></td></tr>
+            <tr data-priority="p4"><td><span class="priority-p4">P4</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3620" target="_blank">MRC-3620</a></td><td>Bill Payment shows Success then Error Screen</td><td><span class="status-pill status-done">Done</span></td></tr>
+            <tr data-priority="p4"><td><span class="priority-p4">P4</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-3867" target="_blank">MRC-3867</a></td><td>Canceled purchase using Virtual CC</td><td><span class="status-pill status-done">Done</span></td></tr>
+            <tr data-priority="p4"><td><span class="priority-p4">P4</span></td><td><a href="https://nubank.atlassian.net/browse/MRC-5000" target="_blank">MRC-5000</a></td><td>"Frees credit in seconds" copy improvement</td><td><span class="status-pill status-done">Canceled</span></td></tr>
+          </tbody>
         </table>
       </div>
 
       <div class="card">
         <div class="section-title">Must-Have Metrics</div>
         <div class="metrics-card">
-          <div><strong>Scenario Coverage:</strong> 0/32 completed in Prod</div>
-          <div><strong>Evidence Sign-off:</strong> 0/32 scenarios</div>
-          <div><strong>Bug Resolution:</strong> 0 P1, 0 P2 open</div>
+          <div><strong>Scenario Coverage:</strong> <span id="prd-metric-coverage">0/32</span> completed in Prod</div>
+          <div><strong>Evidence Sign-off:</strong> <span id="prd-metric-evidence">0/32</span> scenarios</div>
+          <div><strong>Bug Resolution:</strong> <span id="prd-metric-bugs">0 P1, 0 P2 open</span></div>
           <div><strong>Reconciliation:</strong> Green (manual)</div>
           <div><strong>System Automation:</strong> Green (manual)</div>
         </div>
@@ -890,6 +907,81 @@ function injectHealth(tableId, dateMap) {
 
 injectHealth('stg-table', STG_DATES);
 injectHealth('prod-table', PRD_DATES);
+
+function computeMetrics() {
+  function countStatuses(tableId) {
+    var rows = document.getElementById(tableId).querySelectorAll('tr[data-cat]');
+    var total = rows.length, done = 0, inProgress = 0, notStarted = 0;
+    rows.forEach(function(r) {
+      var pill = r.querySelector('.status-pill');
+      if (!pill) return;
+      var s = pill.textContent.trim().toLowerCase();
+      if (s === 'done') done++;
+      else if (s === 'in progress') inProgress++;
+      else notStarted++;
+    });
+    return { total: total, done: done, inProgress: inProgress, notStarted: notStarted };
+  }
+
+  function setGateColor(cardId, current, threshold) {
+    var card = document.getElementById(cardId);
+    if (!card) return;
+    card.classList.remove('gate-red', 'gate-yellow', 'gate-green');
+    if (current >= threshold) card.classList.add('gate-green');
+    else if (current >= threshold * 0.75) card.classList.add('gate-yellow');
+    else card.classList.add('gate-red');
+  }
+
+  var stg = countStatuses('stg-table');
+  document.getElementById('stg-ns-done').textContent = stg.done + '/' + stg.total;
+  document.getElementById('stg-ns-pct').textContent = stg.total ? Math.round(stg.done / stg.total * 100) + '%' : '0%';
+  document.getElementById('stg-gate-coverage').textContent = stg.done + '/' + stg.total;
+  document.getElementById('stg-gate-evidence').textContent = stg.done + '/' + stg.total;
+  setGateColor('stg-gate-coverage-card', stg.done, 29);
+  setGateColor('stg-gate-evidence-card', stg.done, 32);
+  document.getElementById('stg-progress-label').innerHTML = stg.done + ' done &bull; ' + stg.inProgress + ' in progress &bull; ' + stg.notStarted + ' not started';
+  document.getElementById('stg-progress-fill').style.width = (stg.total ? Math.round(stg.done / stg.total * 100) : 0) + '%';
+
+  var prd = countStatuses('prod-table');
+  document.getElementById('prd-ns-done').textContent = prd.done + '/' + prd.total;
+  document.getElementById('prd-ns-pct').textContent = prd.total ? Math.round(prd.done / prd.total * 100) + '%' : '0%';
+  document.getElementById('prd-gate-coverage').textContent = prd.done + '/' + prd.total;
+  document.getElementById('prd-gate-evidence').textContent = prd.done + '/' + prd.total;
+  setGateColor('prd-gate-coverage-card', prd.done, 29);
+  setGateColor('prd-gate-evidence-card', prd.done, 32);
+  document.getElementById('prd-progress-label').innerHTML = prd.done + ' done &bull; ' + prd.inProgress + ' in progress &bull; ' + prd.notStarted + ' not started';
+  document.getElementById('prd-progress-fill').style.width = (prd.total ? Math.round(prd.done / prd.total * 100) : 0) + '%';
+  document.getElementById('prd-metric-coverage').textContent = prd.done + '/' + prd.total;
+  document.getElementById('prd-metric-evidence').textContent = prd.done + '/' + prd.total;
+
+  var bugRows = document.getElementById('bug-table').querySelectorAll('tr[data-priority]');
+  var p = {p1:0,p2:0,p3:0,p4:0}, openP1 = 0, openP2 = 0, totalOpen = 0;
+  bugRows.forEach(function(r) {
+    var pr = r.dataset.priority;
+    p[pr] = (p[pr] || 0) + 1;
+    var st = r.querySelector('.status-pill');
+    var sTxt = st ? st.textContent.trim().toLowerCase() : '';
+    var isOpen = sTxt !== 'done' && sTxt !== 'canceled';
+    if (isOpen) {
+      totalOpen++;
+      if (pr === 'p1') openP1++;
+      if (pr === 'p2') openP2++;
+    }
+  });
+  document.getElementById('prd-bug-p1').textContent = p.p1;
+  document.getElementById('prd-bug-p2').textContent = p.p2;
+  document.getElementById('prd-bug-p3').textContent = p.p3;
+  document.getElementById('prd-bug-p4').textContent = p.p4;
+  document.getElementById('prd-ns-bugs').textContent = totalOpen;
+  var bugText = openP1 + ' P1, ' + openP2 + ' P2 open';
+  document.getElementById('prd-gate-bugs').textContent = bugText;
+  document.getElementById('prd-metric-bugs').textContent = bugText;
+  var bugCard = document.getElementById('prd-gate-bugs-card');
+  bugCard.classList.remove('gate-red', 'gate-yellow', 'gate-green');
+  bugCard.classList.add((openP1 + openP2) === 0 ? 'gate-green' : 'gate-red');
+}
+
+computeMetrics();
 </script>
 </div>
 </body>
